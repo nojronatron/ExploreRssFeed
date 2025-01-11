@@ -1,0 +1,29 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+        <img src="/jrsoftware-logo-128x128.png" width="40" height="40" alt="JRSoftware logo"
+             class="rounded-circle mx-auto shadow-lg" />
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/rssfeeds/NceiNoaaGov">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> NCEI NOAA
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/rssfeeds/DevBlogsDotNetFeed">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Dev Blogs.NET
+            </NavLink>
+        </div>
+
+    </nav>
+</div>
