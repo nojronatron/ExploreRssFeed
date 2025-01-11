@@ -1,0 +1,115 @@
+﻿@page "/testcomponent/{rssfeedurl}"
+
+@using ExploreGetRssFeed.Models
+@using System.Xml.Linq
+@using Microsoft.AspNetCore.Components
+@using Components.Fragments
+
+@inject IConfiguration Configuration
+
+@inject IHttpClientFactory ClientFactory
+@inject ILogger<TestComponent> _logger
+
+@attribute [StreamRendering]
+
+<h3>TestComponent</h3>
+
+<section>
+    @if (string.IsNullOrWhiteSpace(FeedContent) || FeedItems is null)
+    {
+        if (ApiError)
+        {
+            <h4>Error</h4>
+            <p>An error occurred while fetching the stream. Try again later.</p>
+        }
+        else
+        {
+            <p><em>Loading. . .</em></p>
+        }
+    }
+    else
+    {
+        @foreach (var item in FeedItems)
+        {
+            <div value="@item.Id">@(item.Title) @(item.DescriptionAsHtml) @(item.Link)</div>
+        }
+    }
+</section>
+
+@code {
+    [Parameter]
+    public string RssFeedUrl { get; set; } = string.Empty;
+    private string FeedContent { get; set; } = string.Empty;
+    private bool ApiError { get; set; }
+    private IEnumerable<FeedItem>? FeedItems { get; set; }
+
+    private string SomeHtml = "<p>This is <em>HTML</em></p>";
+    public MarkupString GetSomeHtml => new MarkupString(SomeHtml);
+
+    public async Task GetFeed(string targetUrl)
+    {
+        _logger.LogInformation("Entered GetFeed()");
+        var request = new HttpRequestMessage(HttpMethod.Get, targetUrl);
+        request.Headers.Add("Accept", "application/xml");
+        request.Headers.Add("User-Agent", "jonrumsey.devATgemailDOTcom");
+
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            FeedContent = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation("Feed Content: {feedcontent}", FeedContent);
+            ProcessXml();
+        }
+        else
+        {
+            ApiError = true;
+            _logger.LogError("ApiClient response was an unsuccessful status code: {statuscode}", response.StatusCode);
+        }
+    }
+
+    private void ProcessXml()
+    {
+        var xdoc = XDocument.Parse(FeedContent);
+        var items = xdoc.Descendants("item");
+
+        try
+        {
+            _logger.LogInformation("Processing XML.");
+
+            FeedItems = items.Select(item => FeedItem.Create(
+                item.Element("title")?.Value ?? "Untitled",
+                item.Element("link")?.Value ?? string.Empty,
+                item.Element("pubDate")?.Value ?? DateTime.Now.ToString(), 
+            item.Element("description")?.Value ?? string.Empty
+                ));
+            ApiError = false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error processing xml: {err}", ex.Message);
+            _logger.LogError("Inner errorr info: {innererr}", ex.InnerException);
+            ApiError = true;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string? feedUrl;
+
+        if (string.IsNullOrWhiteSpace(RssFeedUrl) == false)
+        {
+            feedUrl = Configuration.GetValue<string>(RssFeedUrl);
+            _logger.LogInformation("FeedUrl resolved to {furl}.", feedUrl);
+
+            if (string.IsNullOrWhiteSpace(feedUrl) == false)
+            {
+                await GetFeed(feedUrl);
+            }
+        }
+
+        base.OnParametersSet();
+    }
+
+}
