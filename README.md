@@ -23,4 +23,5 @@ As time permits, I might add new features to this project. Some top-of-mind idea
 - Dynamically adding RSS Feed URLs based on appsettings or user input.
 - Updating the Style, perhaps to a theme or two.
 - Better processing of feed data to ensure content is displayed correctly. For example, some RSS Feed elements contain HTML tags, others do not, so I assume there will be still others that contain all sorts of unexpected delimiters, character sets and encodings, etc.
- 
+- Add caching.
+- Explore effecient use of Components and Render Fragments.
