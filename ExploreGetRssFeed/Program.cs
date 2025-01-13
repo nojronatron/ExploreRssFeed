@@ -8,6 +8,12 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddLogging();
 
+// if using CORS it must be added prior to add response caching
+builder.Services.AddResponseCaching();
+
+// memory cache is volatile and will be reset when the app is restarted
+builder.Services.AddMemoryCache();
+
 // add a singleton of ApiHelper to the di container
 builder.Services.AddHttpClient();
 
@@ -22,6 +28,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// if using CORS it must be set to use prior to use response caching
+app.UseResponseCaching();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
