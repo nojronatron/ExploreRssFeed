@@ -4,18 +4,19 @@
 @using System.Xml.Linq
 @using Microsoft.AspNetCore.Components
 @using ExploreGetRssFeed.Components.Fragments
+@using Microsoft.Extensions.Caching.Memory
 
 @inject IConfiguration Configuration
-
+@inject IMemoryCache MemoryCache
 @inject IHttpClientFactory ClientFactory
-@inject ILogger<TestComponent> _logger
+@inject ILogger<RssFeeds> _logger
 
 @attribute [StreamRendering]
 
 <h3>Recent RSS Feeds</h3>
 
 <section>
-    @if (string.IsNullOrWhiteSpace(FeedContent) || FeedItems is null)
+    @if (FeedItems is null)
     {
         if (ApiError)
         {
@@ -46,9 +47,27 @@
     private string SomeHtml = "<p>This is <em>HTML</em></p>";
     public MarkupString GetSomeHtml => new MarkupString(SomeHtml);
 
+    private DateTime LastFetchTime { get; set; } = DateTime.MinValue;
+    private TimeSpan CacheDuration => TimeSpan.FromHours(1);
+
     public async Task GetFeed(string targetUrl)
     {
         _logger.LogInformation("Entered GetFeed()");
+
+        // get memorycache as a tuple and assign to cacheEntry variable
+        if (MemoryCache.TryGetValue(targetUrl, 
+            out (IEnumerable<FeedItem> Items, 
+                DateTime LastFetchTime) cacheEntry))
+        {
+            if ((DateTime.Now - cacheEntry.LastFetchTime) < CacheDuration)
+            {
+                _logger.LogInformation("Cache is not expired, displaying cached content.");
+                FeedItems = cacheEntry.Items;
+                ApiError = false;
+                return;
+            }
+        }
+
         var request = new HttpRequestMessage(HttpMethod.Get, targetUrl);
         request.Headers.Add("Accept", "application/xml");
         request.Headers.Add("User-Agent", "jonrumsey.devATgemailDOTcom");
@@ -59,8 +78,10 @@
         if (response.IsSuccessStatusCode)
         {
             FeedContent = await response.Content.ReadAsStringAsync();
-            _logger.LogInformation("Feed Content: {feedcontent}", FeedContent);
+            // _logger.LogInformation("Feed Content: {feedcontent}", FeedContent);
             ProcessXml();
+            // set feeditems and current datetime to memorycache
+            MemoryCache.Set(targetUrl, (FeedItems, DateTime.Now), CacheDuration);
         }
         else
         {
@@ -82,7 +103,7 @@
                 item.Element("title")?.Value ?? "Untitled",
                 item.Element("link")?.Value ?? string.Empty,
                 item.Element("pubDate")?.Value ?? DateTime.Now.ToString(),
-            item.Element("description")?.Value ?? string.Empty
+                item.Element("description")?.Value ?? string.Empty
                 ));
             ApiError = false;
         }

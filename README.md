@@ -8,7 +8,12 @@ This is a simple experimental Web App to get the RSS feed from a website and dis
 
 ## Features
 
-- Built using ASP.NET Blazor 8.0
+- Built using ASP.NET Blazor 8.0 following best practices whenever possible.
+- Uses Streamed, interactive pages.
+- Use configuration file to set RSS feed source targets.
+- Fetches, processes, and neatly displays RSS feed data.
+- Enable processing some native HTML content from the feed.
+- Caches RSS feed data for an hour.
 
 ## Requirements
 
@@ -20,8 +25,10 @@ This is a simple experimental Web App to get the RSS feed from a website and dis
 
 As time permits, I might add new features to this project. Some top-of-mind ideas:
 
-- Dynamically adding RSS Feed URLs based on appsettings or user input.
-- Updating the Style, perhaps to a theme or two.
-- Better processing of feed data to ensure content is displayed correctly. For example, some RSS Feed elements contain HTML tags, others do not, so I assume there will be still others that contain all sorts of unexpected delimiters, character sets and encodings, etc.
-- Add caching.
+- Dynamically adding RSS Feed URLs.
+- Update style.
+- Implement themes.
+- Ensure accessibility.
+- Display publish date of each RSS feed item.
+- Better processing of feed data to ensure content can be safely displayed, especially HTML content, but not executable code.
 - Explore effecient use of Components and Render Fragments.
