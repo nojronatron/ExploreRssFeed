@@ -8,6 +8,9 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddLogging();
 
+// configure weboptimizer for minify, packaging static files
+builder.Services.AddWebOptimizer();
+
 // if using CORS it must be added prior to add response caching
 builder.Services.AddResponseCaching();
 
@@ -31,6 +34,13 @@ app.UseHttpsRedirection();
 
 // if using CORS it must be set to use prior to use response caching
 app.UseResponseCaching();
+
+// see github.com/ligershark/WebOptimizer for details
+//if (!app.Environment.IsDevelopment())
+//{
+    // add weboptimizer for minifying, packaging static files
+    app.UseWebOptimizer();
+//}
 
 app.UseStaticFiles();
 app.UseAntiforgery();
