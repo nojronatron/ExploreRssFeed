@@ -1,4 +1,6 @@
 using ExploreGetRssFeed.Components;
+using ExploreGetRssFeed.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +11,10 @@ builder.Services.AddRazorComponents()
 builder.Services.AddLogging();
 
 // configure weboptimizer for minify, packaging static files
-builder.Services.AddWebOptimizer();
+builder.Services.AddWebOptimizer(pipeline =>
+{
+    pipeline.AddCssBundle("/css/bundle.css", "app.css", "bootstrap/bootstrap.min.css", "ExploreGetRssFeed.styles.css");
+});
 
 // if using CORS it must be added prior to add response caching
 builder.Services.AddResponseCaching();
