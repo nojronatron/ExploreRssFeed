@@ -1,10 +1,12 @@
 ﻿@page "/configurefeeds"
 @using ExploreGetRssFeed.Models
+@using ExploreGetRssFeed.Services
 @using Microsoft.Extensions.Caching.Memory
 @using Microsoft.Extensions.Options
 
 @inject IConfiguration Configuration
 @inject ILogger<ConfigureFeeds> _logger
+@inject IRssDataAccess _rssDataAccess
 
 @rendermode InteractiveServer
 
@@ -51,22 +53,35 @@
 
     private List<FeedEntryModel> RssFeeds { get; set; } = [];
 
-    private void HandleFormSubmission(EditContext context)
+    private async Task HandleFormSubmission(EditContext context)
     {
-        if (context.Validate())
-        {
-            _logger.LogInformation("Form submitted, validation passed.");
-            RssFeeds.Add(NewFeed);
-            NewFeed = new FeedEntryModel();
-        }
-        else
+        if (!context.Validate())
         {
             _logger.LogWarning("Form submitted, validation failed.");
+            // todo: inform user of validation failure and provide advice to fix
+            return;
         }
+
+        int createReturnVal = await _rssDataAccess.Create(NewFeed.Title, NewFeed.WebAddress, NewFeed.PathUrl!);
+
+        if(createReturnVal < 1)
+        {
+            _logger.LogWarning("Data access failed to create new feed.");
+            // todo: inform user storing failed and provide advice to fix
+            return;
+        }
+        
+        _logger.LogInformation("Form submitted, validation passed, data stored (value: {createReturnVal}).", createReturnVal);
+        RssFeeds.Add(NewFeed);
+        NewFeed = new FeedEntryModel();
     }
 
     protected override void OnParametersSet()
     {
+        var data = _rssDataAccess.GetAllEntries();
+        int dataCount = data.Result.Count();
+        _logger.LogInformation("Data access returned {Count} entries", dataCount);
+
         if (RssFeeds.Count < 1)
         {
             var ListOfFeeds = Configuration.GetSection("RssFeeds").Get<List<FeedEntryModel>>();

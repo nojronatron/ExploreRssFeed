@@ -1,5 +1,6 @@
 using ExploreGetRssFeed.Components;
 using ExploreGetRssFeed.Data;
+using ExploreGetRssFeed.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,21 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddLogging();
+
+// entity framework to persist state
+builder.Services.AddDbContextFactory<ExploreGetRssFeedContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString(
+            "ExploreGetRssFeedContext") ?? throw new InvalidOperationException(
+                "Connection string 'ExploreGetRssFeedContext' not found.")));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+// inject the data layer interface service
+builder.Services.AddScoped<IRssDataAccess, RssDataAccess>();
+
+builder.Services.AddQuickGridEntityFrameworkAdapter();
+
+//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // configure weboptimizer for minify, packaging static files
 builder.Services.AddWebOptimizer(pipeline =>
@@ -34,6 +50,20 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+    app.UseMigrationsEndPoint();
+}
+
+// create the database if it does not exist
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ExploreGetRssFeedContext>();
+    context.Database.EnsureCreated();
+    DbInitializer.Initialize(context);
+}
 
 app.UseHttpsRedirection();
 
@@ -41,11 +71,7 @@ app.UseHttpsRedirection();
 app.UseResponseCaching();
 
 // see github.com/ligershark/WebOptimizer for details
-//if (!app.Environment.IsDevelopment())
-//{
-    // add weboptimizer for minifying, packaging static files
-    app.UseWebOptimizer();
-//}
+app.UseWebOptimizer();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
