@@ -1,0 +1,91 @@
+﻿@page "/configurefeeds"
+@using ExploreGetRssFeed.Models
+@using Microsoft.Extensions.Caching.Memory
+@using Microsoft.Extensions.Options
+
+@inject IConfiguration Configuration
+@inject ILogger<ConfigureFeeds> _logger
+
+@rendermode InteractiveServer
+
+<h3>Configure Feeds</h3>
+
+<p>Fill out the form to create a new feed</p>
+
+<EditForm Model="NewFeed" OnSubmit="HandleFormSubmission">
+    <div class="my-2">
+        <label for="Title">Friendly name for this feed</label>
+        <InputText class="mx-1" id="Title" @bind-Value="NewFeed!.Title" />
+        <ValidationMessage For="@(() => NewFeed!.Title)" />
+    </div>
+
+    <div class="my-2">
+        <label for="Url">Enter the feed address</label>
+        <InputText class="mx-1" id="Url" @bind-Value="NewFeed!.WebAddress" />
+        <ValidationMessage For="@(()=>NewFeed!.WebAddress)" />
+    </div>
+
+    <div class="my-2">
+        <button class="btn btn-primary" type="submit">Add This Feed</button>
+    </div>
+
+    <div class="my-2">
+        <DataAnnotationsValidator />
+    </div>
+
+</EditForm>
+
+<h4>Existing Feeds</h4>
+<p>Title: URL</p>
+
+<ul>
+    @foreach (FeedEntryModel entry in RssFeeds)
+    {
+        <li>@entry.ToRow()</li>
+    }
+</ul>
+
+@code {
+    [SupplyParameterFromForm]
+    private FeedEntryModel NewFeed { get; set; } = new();
+
+    private List<FeedEntryModel> RssFeeds { get; set; } = [];
+
+    private void HandleFormSubmission(EditContext context)
+    {
+        if (context.Validate())
+        {
+            _logger.LogInformation("Form submitted, validation passed.");
+            RssFeeds.Add(NewFeed);
+            NewFeed = new FeedEntryModel();
+        }
+        else
+        {
+            _logger.LogWarning("Form submitted, validation failed.");
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (RssFeeds.Count < 1)
+        {
+            var ListOfFeeds = Configuration.GetSection("RssFeeds").Get<List<FeedEntryModel>>();
+
+            if (ListOfFeeds is null)
+            {
+                _logger.LogWarning("Unable to find section RssFeeds in appsettings.");
+                return;
+            }
+
+            var dateTimeStamp = DateTime.Now;
+            RssFeeds = ListOfFeeds;
+        }
+        else
+        {
+            _logger.LogInformation("RssFeeds store already populated.");
+            RssFeeds = new List<FeedEntryModel>();
+        }
+
+        // base is not customized so no need to call base.OnParametersSet()
+    }
+}

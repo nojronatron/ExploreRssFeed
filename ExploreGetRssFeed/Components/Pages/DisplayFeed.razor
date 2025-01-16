@@ -1,4 +1,4 @@
-﻿@page "/rssfeeds/{rssfeedurl}"
+﻿@page "/displayfeed/{rssfeedurl}"
 
 @using ExploreGetRssFeed.Models
 @using System.Xml.Linq
@@ -9,7 +9,7 @@
 @inject IConfiguration Configuration
 @inject IMemoryCache MemoryCache
 @inject IHttpClientFactory ClientFactory
-@inject ILogger<RssFeeds> _logger
+@inject ILogger<DisplayFeed> _logger
 
 @attribute [StreamRendering]
 
@@ -42,7 +42,7 @@
     public string RssFeedUrl { get; set; } = string.Empty;
     private string FeedContent { get; set; } = string.Empty;
     private bool ApiError { get; set; }
-    private IEnumerable<FeedItem>? FeedItems { get; set; }
+    private IEnumerable<FeedModel>? FeedItems { get; set; }
 
     private string SomeHtml = "<p>This is <em>HTML</em></p>";
     public MarkupString GetSomeHtml => new MarkupString(SomeHtml);
@@ -56,7 +56,7 @@
 
         // get memorycache as a tuple and assign to cacheEntry variable
         if (MemoryCache.TryGetValue(targetUrl, 
-            out (IEnumerable<FeedItem> Items, 
+            out (IEnumerable<FeedModel> Items, 
                 DateTime LastFetchTime) cacheEntry))
         {
             if ((DateTime.Now - cacheEntry.LastFetchTime) < CacheDuration)
@@ -99,7 +99,7 @@
         {
             _logger.LogInformation("Processing XML.");
 
-            FeedItems = items.Select(item => FeedItem.Create(
+            FeedItems = items.Select(item => FeedModel.Create(
                 item.Element("title")?.Value ?? "Untitled",
                 item.Element("link")?.Value ?? string.Empty,
                 item.Element("pubDate")?.Value ?? DateTime.Now.ToString(),
