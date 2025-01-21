@@ -10,53 +10,60 @@
 
 @rendermode InteractiveServer
 
-<h3>Configure Feeds</h3>
+<h3 class="text-center">Configure Feeds</h3>
 
-<p>Fill out the form to create a new feed</p>
+<h4 class="text-center mb-3">Fill out the form to create a new feed</h4>
 
-<EditForm Model="NewFeed" OnSubmit="HandleFormSubmission">
-    <div class="my-2">
-        <label for="Title">Friendly name for this feed</label>
-        <InputText class="mx-1" id="Title" @bind-Value="NewFeed!.Title" />
+<EditForm EditContext="_editContext" OnSubmit="HandleFormSubmission" class="container-md text-center">
+    <div class="row justify-content-md-center my-2">
+        <label for="Title" class="col">Friendly name for this feed</label>
+        <InputText class="col" id="Title" @bind-Value="NewFeed!.Title" />
         <ValidationMessage For="@(() => NewFeed!.Title)" />
     </div>
 
-    <div class="my-2">
-        <label for="Url">Enter the feed address</label>
-        <InputText class="mx-1" id="Url" @bind-Value="NewFeed!.WebAddress" />
+    <div class="row justify-content-md-center my-2">
+        <label for="Url" class="col">Enter the feed address</label>
+        <InputText class="col" id="Url" @bind-Value="NewFeed!.WebAddress" />
         <ValidationMessage For="@(()=>NewFeed!.WebAddress)" />
     </div>
 
-    <div class="my-2">
-        <button class="btn btn-primary" type="submit">@(FeedToEdit is null ? AddItemButtonText : UpdateItemButtonText)</button>
+    <div class="row justify-content-md-center my-2">
+        <div class="col"></div>
+        <button class="btn btn-primary col" type="submit" 
+            disabled="@(!_editContext.Validate())">
+            @(FeedToEdit is null ? AddItemButtonText : UpdateItemButtonText)
+        </button>
     </div>
 
-    <div class="my-2">
+    <div class="row justify-content-md-center my-3">
         <DataAnnotationsValidator />
     </div>
 
 </EditForm>
 
-<h4>Existing Feeds</h4>
+<h3 class="text-center">Existing Feeds</h3>
 
 @if (RssFeeds.Count < 1)
 {
-    <p>Add feeds using the form above.</p>
+    <h4 class="text-center">There are no feeds yet</h4>
+    <p class="text-center">Add feeds using the form above.</p>
 }
 else
 {
-    <p>By Title, URL</p>
+    <h4 class="text-center">Feeds By Title, URL</h4>
 
-    @foreach (var feedItem in RssFeeds.ToList())
-    {
-        <div>
-            <span>@(feedItem.Title)</span>
-            <button class="btn btn-outline-secondary" type="button" @onclick="@(() => HandleEditFeedItem(feedItem))">Edit</button>
-            <button class="btn btn-danger d-inline" type="button" @onclick="@(() => HandleDeleteFeedItem(feedItem))">Delete</button>
-        </div>
-    }
-
-    <br />
+    <div class="container-md text-center mb-3">
+        @foreach (var feedItem in RssFeeds.ToList())
+        {
+            <div class="row justify-content-md-center my-2">
+                <h5 class="col">@(feedItem.Title)</h5>
+                <button class="btn btn-outline-secondary col" 
+                type="button" @onclick="@(() => HandleEditFeedItem(feedItem))">Edit</button>
+                <button class="btn btn-danger d-inline col" 
+                type="button" @onclick="@(() => HandleDeleteFeedItem(feedItem))">Delete</button>
+            </div>
+        }
+    </div>
 }
 
 @code {
@@ -65,6 +72,7 @@ else
 
     private string AddItemButtonText => "Add This Feed";
     private string UpdateItemButtonText => "Update This Feed";
+    private EditContext? _editContext;
 
     private FeedEntryModel? FeedToEdit { get; set; }
     private List<FeedEntryModel> RssFeeds { get; set; } = [];
@@ -83,6 +91,7 @@ else
         }
         FeedToEdit = feedItem;
         NewFeed = await _rssDataAccess.GetAsync(feedItem.Title);
+        _editContext = new EditContext(NewFeed);
     }
 
     private async Task HandleDeleteFeedItem(FeedEntryModel feedEntry)
@@ -103,7 +112,7 @@ else
         if (!context.Validate())
         {
             _logger.LogError("Form submitted, validation failed.");
-            throw new InvalidOperationException("Form validation failed and somehow the form was submitted.");
+            return;
         }
 
         if (FeedToEdit is not null)
@@ -112,15 +121,15 @@ else
             _logger.LogInformation("Form submitted, validation passed, data updated (value: {updateReturnVal}).", updateReturnVal);
             FeedToEdit = null;
             NewFeed = new();
+            _editContext = new EditContext(NewFeed);
             return;
         }
 
         int createReturnVal = await _rssDataAccess.CreateAsync(NewFeed.Title!, NewFeed.WebAddress!, NewFeed.PathUrl!);
         _logger.LogInformation("Form submitted, validation passed, data stored (value: {createReturnVal}).", createReturnVal);
         RssFeeds.Add(NewFeed);
-
-        // todo: confirm that newing an instance does not cause a regression
         NewFeed = new();
+        _editContext = new EditContext(NewFeed);
     }
 
     protected override async Task OnParametersSetAsync()
@@ -143,5 +152,10 @@ else
         RssFeeds = allEntries.ToList();
 
         // base is not customized so no need to call base.OnParametersSet()
+    }
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(NewFeed);
     }
 }
