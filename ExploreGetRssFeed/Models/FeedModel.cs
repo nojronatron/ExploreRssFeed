@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace ExploreGetRssFeed.Models
 {
-    public class FeedItem
+    public class FeedModel
     {
         public int? Id { get; set; }
         [Display(Name = "Title")]
@@ -23,14 +23,14 @@ namespace ExploreGetRssFeed.Models
         public MarkupString DescriptionAsHtml => new MarkupString(Description);
         public MarkupString LinkAsHtml => new MarkupString($"<a href=\"{Link}\">{Link}</a>");
 
-        public static FeedItem Create(string title, string link, string pubDate, string description)
+        public static FeedModel Create(string title, string link, string pubDate, string description)
         {
             string cleanTitle = title.Trim();
             string cleanLink = CleanLink(link);
             DateTime cleanPubDate = string.IsNullOrWhiteSpace(pubDate) ? DateTime.Now : DateTime.Parse(pubDate);
             string cleanDescription = CleanDescription(description);
 
-            return new FeedItem()
+            return new FeedModel()
             {
                 Title = cleanTitle,
                 Link = cleanLink,
@@ -39,13 +39,13 @@ namespace ExploreGetRssFeed.Models
             };
         }
 
-        public static FeedItem Create(string title, string link, string description)
+        public static FeedModel Create(string title, string link, string description)
         {
             string cleanTitle = title.Trim();
             string cleanLink = CleanLink(link);
             string cleanDescription = CleanDescription(description);
 
-            return new FeedItem()
+            return new FeedModel()
             {
                 Title = cleanTitle,
                 Link = cleanLink,
@@ -90,5 +90,4 @@ namespace ExploreGetRssFeed.Models
             return result;
         }
     }
-
 }
