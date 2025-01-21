@@ -90,5 +90,4 @@ namespace ExploreGetRssFeed.Models
             return result;
         }
     }
-
 }
