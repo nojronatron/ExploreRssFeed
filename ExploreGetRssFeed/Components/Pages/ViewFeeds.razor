@@ -1,7 +1,45 @@
 ﻿@page "/viewfeeds"
 
-<h3>View</h3>
+@using ExploreGetRssFeed.Models
+@using ExploreGetRssFeed.Services
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+@inject ILogger<ViewFeeds> _logger
+@inject IRssDataAccess _rssDataAccess
+
+@rendermode InteractiveServer
+
+<h3>Your Feeds</h3>
+
+@if(Feeds is null)
+{
+    <p><em>Loading . . .</em></p>
+}
+else
+{
+    <QuickGrid Class="table" Items="Feeds">
+        <PropertyColumn Property="feed => feed.Title" />
+        <PropertyColumn Property="feed => feed.PathUrl" />
+    </QuickGrid>
+}
 
 @code {
+    public IQueryable<FeedEntryModel> Feeds { get; set; }
 
+    protected override async void OnParametersSet()
+    {
+        _logger.LogInformation("OnParametersSet: Loading feeds from DB.");
+
+        var feedModels = await _rssDataAccess.GetAllAsync();
+
+        foreach(var feed in feedModels)
+        {
+            _logger.LogInformation(
+                "Fetched FeedModel instance: {title}, {link}", 
+                feed.Title, feed.RouteName);
+        }
+
+        Feeds = feedModels.AsQueryable<FeedEntryModel>();
+    }
 }

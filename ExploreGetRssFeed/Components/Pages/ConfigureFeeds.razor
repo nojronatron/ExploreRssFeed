@@ -28,7 +28,7 @@
     </div>
 
     <div class="my-2">
-        <button class="btn btn-primary" type="submit">Add This Feed</button>
+        <button class="btn btn-primary" type="submit">@(FeedToEdit is null ? AddItemButtonText : UpdateItemButtonText)</button>
     </div>
 
     <div class="my-2">
@@ -38,68 +38,109 @@
 </EditForm>
 
 <h4>Existing Feeds</h4>
-<p>Title: URL</p>
 
-<ul>
-    @foreach (FeedEntryModel entry in RssFeeds)
+@if (RssFeeds.Count < 1)
+{
+    <p>Add feeds using the form above.</p>
+}
+else
+{
+    <p>By Title, URL</p>
+
+    @foreach (var feedItem in RssFeeds.ToList())
     {
-        <li>@entry.ToRow()</li>
+        <div>
+            <span>@(feedItem.Title)</span>
+            <button class="btn btn-outline-secondary" type="button" @onclick="@(() => HandleEditFeedItem(feedItem))">Edit</button>
+            <button class="btn btn-danger d-inline" type="button" @onclick="@(() => HandleDeleteFeedItem(feedItem))">Delete</button>
+        </div>
     }
-</ul>
+
+    <br />
+}
 
 @code {
     [SupplyParameterFromForm]
     private FeedEntryModel NewFeed { get; set; } = new();
 
+    private string AddItemButtonText => "Add This Feed";
+    private string UpdateItemButtonText => "Update This Feed";
+
+    private FeedEntryModel? FeedToEdit { get; set; }
     private List<FeedEntryModel> RssFeeds { get; set; } = [];
+
+    string ButtonText { get; set; } = "Add This Feed";
+
+    private async Task HandleEditFeedItem(FeedEntryModel feedItem)
+    {
+        _logger.LogInformation("Entered HandleEditFeedItem method");
+
+        if (feedItem is null || string.IsNullOrWhiteSpace(feedItem.Title))
+        {
+            // todo: Notify the user that the update could not be completed
+            // and supply information on how to continue or correct the issue
+            return;
+        }
+        FeedToEdit = feedItem;
+        NewFeed = await _rssDataAccess.GetAsync(feedItem.Title);
+    }
+
+    private async Task HandleDeleteFeedItem(FeedEntryModel feedEntry)
+    {
+        _logger.LogInformation("Entered HandleDeleteFeedItem method.");
+
+        int deleteCount = await _rssDataAccess.RemoveAsync(
+            feedEntry.Title!
+        );
+
+        _logger.LogInformation("Feed deleted: {title}, {webaddr}, {pathurl}.",
+            feedEntry.Title, feedEntry.WebAddress, feedEntry.PathUrl);
+        RssFeeds.Remove(feedEntry);
+    }
 
     private async Task HandleFormSubmission(EditContext context)
     {
         if (!context.Validate())
         {
-            _logger.LogWarning("Form submitted, validation failed.");
-            // todo: inform user of validation failure and provide advice to fix
-            return;
+            _logger.LogError("Form submitted, validation failed.");
+            throw new InvalidOperationException("Form validation failed and somehow the form was submitted.");
         }
 
-        int createReturnVal = await _rssDataAccess.Create(NewFeed.Title, NewFeed.WebAddress, NewFeed.PathUrl!);
-
-        if(createReturnVal < 1)
+        if (FeedToEdit is not null)
         {
-            _logger.LogWarning("Data access failed to create new feed.");
-            // todo: inform user storing failed and provide advice to fix
+            int updateReturnVal = await _rssDataAccess.UpdateAsync(FeedToEdit, NewFeed);
+            _logger.LogInformation("Form submitted, validation passed, data updated (value: {updateReturnVal}).", updateReturnVal);
+            FeedToEdit = null;
+            NewFeed = new();
             return;
         }
-        
+
+        int createReturnVal = await _rssDataAccess.CreateAsync(NewFeed.Title!, NewFeed.WebAddress!, NewFeed.PathUrl!);
         _logger.LogInformation("Form submitted, validation passed, data stored (value: {createReturnVal}).", createReturnVal);
         RssFeeds.Add(NewFeed);
-        NewFeed = new FeedEntryModel();
+
+        // todo: confirm that newing an instance does not cause a regression
+        NewFeed = new();
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        var data = _rssDataAccess.GetAllEntries();
-        int dataCount = data.Result.Count();
-        _logger.LogInformation("Data access returned {Count} entries", dataCount);
+        // db data should be preferred over static configuration data
+        var allEntries = await _rssDataAccess.GetAllAsync();
+        int rssFeedsCount = allEntries.Count();
+        _logger.LogInformation("Data access returned {Count} entries", rssFeedsCount);
 
-        if (RssFeeds.Count < 1)
+        if (rssFeedsCount < 1)
         {
-            var ListOfFeeds = Configuration.GetSection("RssFeeds").Get<List<FeedEntryModel>>();
-
-            if (ListOfFeeds is null)
-            {
-                _logger.LogWarning("Unable to find section RssFeeds in appsettings.");
-                return;
-            }
-
-            var dateTimeStamp = DateTime.Now;
-            RssFeeds = ListOfFeeds;
+            _logger.LogWarning("If this is first-time-run in Release mode then ignore this warning.");
         }
         else
         {
             _logger.LogInformation("RssFeeds store already populated.");
-            RssFeeds = new List<FeedEntryModel>();
         }
+
+        var dateTimeStamp = DateTime.Now;
+        RssFeeds = allEntries.ToList();
 
         // base is not customized so no need to call base.OnParametersSet()
     }

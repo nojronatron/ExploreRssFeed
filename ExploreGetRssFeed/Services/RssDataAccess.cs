@@ -18,37 +18,18 @@ namespace ExploreGetRssFeed.Services
         /// <summary>
         /// Creates a new feed entry in the database.
         /// </summary>
-        /// <param name="itemToAdd">The FeedModel to add.</param>
-        /// <returns>The number of entries written to the db.</returns>
-        public async Task<int> Create(FeedModel itemToAdd)
-        {
-            using var context = dbFactory.CreateDbContext();
-            var dto = new FeedEntryDataModel
-            {
-                Title = itemToAdd.Title,
-                RouteName = itemToAdd.Link,
-                WebAddress = itemToAdd.Creator
-            };
-
-            context.FeedEntryDataModels.Add(dto);
-            return await context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Creates a new feed entry in the database.
-        /// </summary>
-        /// <param name="title">The title for the new feed entry.</param>
-        /// <param name="webAddress">The web address (target) to the feed.</param>
-        /// <param name="routeName">The blazor page directive path.</param>
-        /// <returns>The number of entries written to the db.</returns>
-        public async Task<int> Create(string title, string webAddress, string routeName)
+        /// <param name="title">The title for the new feed entry</param>
+        /// <param name="webAddress">The web address (target) to the feed</param>
+        /// <param name="pathUrl">The blazor page directive path</param>
+        /// <returns>The number of entries written to the db</returns>
+        public async Task<int> CreateAsync(string title, string webAddress, string pathUrl)
         {
             using var context = dbFactory.CreateDbContext();
 
             var dto = new FeedEntryDataModel
             {
                 Title = title,
-                RouteName = routeName,
+                RouteName = pathUrl,
                 WebAddress = webAddress
             };
 
@@ -59,14 +40,14 @@ namespace ExploreGetRssFeed.Services
         /// <summary>
         /// Retrieves all feed entries from the database.
         /// </summary>
-        /// <returns>A list of FeedModel.</returns>
-        public async Task<IEnumerable<FeedModel>> GetAllEntries()
+        /// <returns>A list of FeedModel</returns>
+        public async Task<IEnumerable<FeedEntryModel>> GetAllAsync()
         {
             using var context = dbFactory.CreateDbContext();
             var dtoList = await context.FeedEntryDataModels.AsNoTracking().ToListAsync();
 
             return dtoList.Select(
-                dto => FeedModel.Create(
+                dto => FeedEntryModel.Create(
                     dto.Title,
                     dto.RouteName,
                     dto.WebAddress
@@ -74,76 +55,99 @@ namespace ExploreGetRssFeed.Services
         }
 
         /// <summary>
-        /// Update the title of a specific item.
+        /// Overwrite an existing item with new values.
+        /// This is an overwrite operation if all values are changed.
         /// </summary>
-        /// <param name="feedItemToChange">The item to update.</param>
-        /// <param name="newTitle">The new Title.</param>
-        /// <returns>The number of changes written to the database.</returns>
-        public async Task<int> UpdateTitle(FeedEntryModel feedItemToChange, string newTitle)
+        /// <param name="existingItem">Existing item in the database</param>
+        /// <param name="updatedItem">A new instance whose properties are used to update the existing item properties</param>
+        /// <returns></returns>
+        public async Task<int> UpdateAsync(FeedEntryModel existingItem, FeedEntryModel updatedItem)
         {
             using var context = dbFactory.CreateDbContext();
             var dtoToUpdate = await context.FeedEntryDataModels
                 .FirstOrDefaultAsync(feedEntry =>
-                    feedEntry.Title == feedItemToChange.Title
-                    && feedEntry.WebAddress == feedItemToChange.WebAddress);
+                    feedEntry.Title == existingItem.Title);
 
             if (dtoToUpdate is null)
             {
-                logger.LogWarning("No item found to update.");
+                logger.LogWarning("No item with Title {title} was found, no update performed.", existingItem.Title);
                 return 0;
-            };
+            }
 
-            dtoToUpdate.Title = newTitle;
-            return await context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Update the web address of a specific item.
-        /// </summary>
-        /// <param name="feedItemToChange">The item to update.</param>
-        /// <param name="newWebAddress">The new web address.</param>
-        /// <returns>The number of changes written to the database.</returns>
-        public async Task<int> UpdateWebAddress(FeedEntryModel feedItemToChange, string newWebAddress)
-        {
-            using var context = dbFactory.CreateDbContext();
-            var dtoToUpdate = await context.FeedEntryDataModels
-                .FirstOrDefaultAsync(feedEntry =>
-                    feedEntry.Title == feedItemToChange.Title
-                    && feedEntry.WebAddress == feedItemToChange.WebAddress);
-
-            if (dtoToUpdate is null)
+            if (string.IsNullOrWhiteSpace(updatedItem.RouteName) == false
+                && dtoToUpdate.RouteName.Equals(updatedItem.RouteName) == false)
             {
-                logger.LogWarning("No item found to update.");
-                return 0;
-            };
+                dtoToUpdate.RouteName = updatedItem.RouteName;
+            }
 
-            dtoToUpdate.WebAddress = newWebAddress;
+            if (string.IsNullOrWhiteSpace(updatedItem.WebAddress) == false
+                && dtoToUpdate.WebAddress.Equals(updatedItem.WebAddress) == false)
+            {
+                dtoToUpdate.WebAddress = updatedItem.WebAddress;
+            }
+
+            if (string.IsNullOrWhiteSpace(updatedItem.Title) == false
+                && dtoToUpdate.Title.Equals(updatedItem.Title) == false)
+            {
+                dtoToUpdate.Title = updatedItem.Title;
+            }
+
             return await context.SaveChangesAsync();
         }
-
 
         /// <summary>
         /// Removes a specific item from the database. This operation is permanent and not reversable.
         /// </summary>
-        /// <param name="itemToRemove">The item to remove.</param>
-        /// <returns>The number of items removed from the database.</returns>
-        public async Task<int> Remove(FeedEntryModel itemToRemove)
+        /// <param name="title">Title</param>
+        /// <returns>The number of items removed from the database</returns>
+        public async Task<int> RemoveAsync(string title)
         {
             using var context = dbFactory.CreateDbContext();
 
-            var dtoToRemove = await context.FeedEntryDataModels
+            var itemToRemove = await context.FeedEntryDataModels
                 .FirstOrDefaultAsync(feedEntry =>
-                    feedEntry.Title == itemToRemove.Title
-                    && feedEntry.WebAddress == itemToRemove.WebAddress);
+                    feedEntry.Title == title);
 
-            if (dtoToRemove is null)
+            if (itemToRemove is null)
             {
                 logger.LogWarning("No item found to remove.");
                 return 0;
             };
 
-            context.Remove(dtoToRemove);
+            context.Remove(itemToRemove);
             return await context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Retrieves a specific item from the database using its Title.
+        /// </summary>
+        /// <param name="title">Title</param>
+        /// <returns>A found instance representation, or empty if not found</returns>
+        public async Task<FeedEntryModel> GetAsync(string title)
+        {
+            using var context = dbFactory.CreateDbContext();
+
+            var foundItem = await context.FeedEntryDataModels
+                .FirstOrDefaultAsync(feedEntry =>
+                feedEntry.Title == title);
+
+            if (foundItem is not null)
+            {
+                logger.LogInformation("Item found with title {title}", title);
+
+                // null coalescing operator ?? returns value of left-hand operand if not null
+                // otherwise returns the right-hand operand
+                var result = FeedEntryModel.Create(
+                    foundItem.Title,
+                    foundItem.RouteName ?? string.Empty,
+                    foundItem.WebAddress ?? string.Empty
+                    );
+
+                return result;
+            }
+            
+            logger.LogWarning("No item found with title {title}", title);
+            return new FeedEntryModel();
         }
     }
 }

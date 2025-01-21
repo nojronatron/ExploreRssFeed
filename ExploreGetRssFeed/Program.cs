@@ -61,8 +61,8 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ExploreGetRssFeedContext>();
-    context.Database.EnsureCreated();
-    DbInitializer.Initialize(context);
+    var config = services.GetRequiredService<IConfiguration>();
+    DbInitializer.Initialize(config, context, app.Environment.IsDevelopment());
 }
 
 app.UseHttpsRedirection();
