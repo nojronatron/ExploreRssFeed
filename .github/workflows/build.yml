@@ -22,4 +22,4 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build .\ExploreGetRssFeed\ExploreGetRssFeed.csproj --configuration Release --no-restore
+      run: dotnet build ExploreGetRssFeed.sln --configuration Release --no-restore
