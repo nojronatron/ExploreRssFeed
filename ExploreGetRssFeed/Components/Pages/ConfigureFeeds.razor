@@ -30,7 +30,7 @@
     <div class="row justify-content-md-center my-2">
         <div class="col"></div>
         <button class="btn btn-primary col" type="submit" 
-            disabled="@(!_editContext.Validate())">
+        disabled="@(!_editContext!.Validate())">
             @(FeedToEdit is null ? AddItemButtonText : UpdateItemButtonText)
         </button>
     </div>
@@ -83,7 +83,7 @@ else
     {
         _logger.LogInformation("Entered HandleEditFeedItem method");
 
-        if (feedItem is null || string.IsNullOrWhiteSpace(feedItem.Title))
+        if (string.IsNullOrWhiteSpace(feedItem.Title))
         {
             string routeName = string.IsNullOrWhiteSpace(feedItem.RouteName)
                 ? string.Empty
