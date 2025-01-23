@@ -1,9 +1,9 @@
-name: Release Build
+name: Debug Build and Test
 
 on:
   pull_request:
     branches:
-      - main
+      - staging
 
 jobs:
   build:
@@ -23,3 +23,6 @@ jobs:
 
     - name: Build
       run: dotnet build ExploreGetRssFeed.sln --configuration Release --no-restore
+
+    - name: Run tests
+      run: dotnet test --no-restore --verbosity normal

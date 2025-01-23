@@ -11,7 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		.github\workflows\build.yml = .github\workflows\build.yml
 		README.md = README.md
+		.github\workflows\test.yml = .github\workflows\test.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExploreGetRssFeed.Tests", "ExploreGetRssFeed.Tests\ExploreGetRssFeed.Tests.csproj", "{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +26,10 @@ Global
 		{31ED500F-94BE-41AA-AFF0-47CE742D8DEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31ED500F-94BE-41AA-AFF0-47CE742D8DEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31ED500F-94BE-41AA-AFF0-47CE742D8DEB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A5C99C4-E28B-48F0-A4D6-4563C947A6BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A5C99C4-E28B-48F0-A4D6-4563C947A6BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A5C99C4-E28B-48F0-A4D6-4563C947A6BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A5C99C4-E28B-48F0-A4D6-4563C947A6BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
