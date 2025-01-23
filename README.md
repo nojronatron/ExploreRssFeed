@@ -25,7 +25,7 @@ This is a simple experimental Web App to get the RSS feed from a website and dis
 ## Requirements
 
 - RSS Feed URLs must be known, valid, and configured in `appsettings.json`
-- DotNET 9.0
+- DotNET 8.0
 - An internet connection
 
 ## Future
@@ -45,4 +45,4 @@ As time permits new features may be added. Some top-of-mind ideas:
 ## References and Kudos
 
 - [LigerShark WebOptimizer](https://github.com/ligershark/WebOptimizer)
-- [ASP.NET Core Blazor in .NET 9.0](https://learn.microsoft.com/en-us/aspnet/core/blazor/?view=aspnetcore-9.0)
+- [ASP.NET Core Blazor in .NET 8.0](https://learn.microsoft.com/en-us/aspnet/core/blazor/?view=aspnetcore-8.0)
