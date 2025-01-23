@@ -76,7 +76,12 @@ namespace ExploreGetRssFeed.Models
                 description.Trim();
         }
 
-        // Get only the link with the protocol, host, and path.
+        /// <summary>
+        /// Clean the link by removing any leading characters before the 
+        /// http(s) protocol and excluding the closing </link> tag.
+        /// </summary>
+        /// <param name="link"></param>
+        /// <returns>String of only the link text</returns>
         public static string CleanLink(string link)
         {
             if (string.IsNullOrWhiteSpace(link))
