@@ -7,6 +7,7 @@
 
 @inject ILogger<ViewFeeds> _logger
 @inject IRssDataAccess _rssDataAccess
+@inject NavigationManager NavManager
 
 @rendermode InteractiveServer
 
@@ -18,14 +19,29 @@
 }
 else
 {
-    <QuickGrid Class="table" Items="Feeds">
-        <PropertyColumn Property="feed => feed.Title" />
-        <PropertyColumn Property="feed => feed.PathUrl" />
-    </QuickGrid>
+    <p>Click a feed title to load recent feed items</p>
+
+    <div class="container">
+        <div class="col">
+            <div class="row">
+                @for (int idx = 0; idx < Feeds.Count(); idx++)
+                {
+                    var feed = Feeds.ElementAt(idx);
+                    string feedNavRoute = $"{feed.BaseUrl}{feed.RouteName}";
+                    <button type="button" @onclick="@(()=>HandleNavManager(feed))">@feed.Title</button>
+                }
+            </div>
+        </div>
+    </div>
 }
 
 @code {
-    public IQueryable<FeedEntryModel> Feeds { get; set; }
+    public IQueryable<FeedEntryModel>? Feeds { get; set; }
+
+    private void HandleNavManager(FeedEntryModel feedEntryItem)
+    {
+        NavManager.NavigateTo(feedEntryItem.PathUrl);
+    }
 
     protected override async void OnParametersSet()
     {
