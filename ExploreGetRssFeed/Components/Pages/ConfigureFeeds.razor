@@ -30,7 +30,7 @@
     <div class="row justify-content-md-center my-2">
         <div class="col"></div>
         <button class="btn btn-primary col" type="submit" 
-            disabled="@(!_editContext.Validate())">
+        disabled="@(!_editContext!.Validate())">
             @(FeedToEdit is null ? AddItemButtonText : UpdateItemButtonText)
         </button>
     </div>
@@ -83,14 +83,20 @@ else
     {
         _logger.LogInformation("Entered HandleEditFeedItem method");
 
-        if (feedItem is null || string.IsNullOrWhiteSpace(feedItem.Title))
+        if (string.IsNullOrWhiteSpace(feedItem.Title))
         {
-            // todo: Notify the user that the update could not be completed
-            // and supply information on how to continue or correct the issue
+            string routeName = string.IsNullOrWhiteSpace(feedItem.RouteName)
+                ? string.Empty
+                : feedItem.RouteName;
+            string pathUrl = string.IsNullOrWhiteSpace(feedItem.PathUrl)
+                ? string.Empty
+                : feedItem.PathUrl;
+            _logger.LogWarning("Somehow feed item with route name {routename} and path URL {pathurl} had no title.", routeName, pathUrl);
             return;
         }
+
         FeedToEdit = feedItem;
-        NewFeed = await _rssDataAccess.GetAsync(feedItem.Title);
+        NewFeed = await _rssDataAccess.GetByTitleAsync(feedItem.Title);
         _editContext = new EditContext(NewFeed);
     }
 
