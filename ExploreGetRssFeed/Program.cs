@@ -38,8 +38,22 @@ builder.Services.AddResponseCaching();
 // memory cache is volatile and will be reset when the app is restarted
 builder.Services.AddMemoryCache();
 
+// get user-configured useragent string from Configuration
+string userAgentString = builder.Configuration["HttpClient:UserAgentString"] ?? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+int httpTimeoutSeconds = 10;
+
+if (int.TryParse(builder.Configuration["HttpClient:TimeoutInt"], out int parsedSeconds))
+{
+    httpTimeoutSeconds = parsedSeconds;
+}
+
 // add a singleton of ApiHelper to the di container
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("RssClient", config =>
+{
+    config.DefaultRequestHeaders.Add("User-Agent", userAgentString);
+    config.DefaultRequestHeaders.Add("Accept", "application/xml");
+    config.Timeout = TimeSpan.FromSeconds(httpTimeoutSeconds);
+});
 
 var app = builder.Build();
 
