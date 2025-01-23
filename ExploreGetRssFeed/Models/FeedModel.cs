@@ -23,6 +23,8 @@ namespace ExploreGetRssFeed.Models
         public MarkupString DescriptionAsHtml => new MarkupString(Description);
         public MarkupString LinkAsHtml => new MarkupString($"<a href=\"{Link}\">{Link}</a>");
 
+        private static TimeSpan DefaultTimeout => TimeSpan.FromSeconds(2);
+
         public static FeedModel Create(string title, string link, string pubDate, string description)
         {
             string cleanTitle = title.Trim();
@@ -70,13 +72,18 @@ namespace ExploreGetRssFeed.Models
             }
 
             string pattern = @"<p>(.*?)</p>";
-            var match = Regex.Match(description, pattern, RegexOptions.IgnoreCase);
+            var match = Regex.Match(description, pattern, RegexOptions.IgnoreCase, DefaultTimeout);
             return match.Success ? 
                 match.Groups[1].Value.Trim() : 
                 description.Trim();
         }
 
-        // Get only the link with the protocol, host, and path.
+        /// <summary>
+        /// Clean the link by removing any leading characters before the 
+        /// http(s) protocol and excluding the closing </link> tag.
+        /// </summary>
+        /// <param name="link"></param>
+        /// <returns>String of only the link text</returns>
         public static string CleanLink(string link)
         {
             if (string.IsNullOrWhiteSpace(link))
@@ -84,10 +91,9 @@ namespace ExploreGetRssFeed.Models
                 return string.Empty;
             }
 
-            int hIndex = link.Contains("http") ? link.IndexOf("http") : 0;
-            int endLinkIndex = link.Contains("</link>") ? link.IndexOf("</link>") : 0;
-            string result = link.Substring(hIndex, link.Length - endLinkIndex);
-            return result;
+            string pattern = @"<link>(.*?)</link>";
+            var match = Regex.Match(link, pattern, RegexOptions.IgnoreCase, DefaultTimeout);
+            return match.Success ? match.Groups[1].Value.Trim() : link.Trim();
         }
     }
 }
