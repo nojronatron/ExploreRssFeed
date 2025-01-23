@@ -94,8 +94,9 @@ else
             _logger.LogWarning("Somehow feed item with route name {routename} and path URL {pathurl} had no title.", routeName, pathUrl);
             return;
         }
+
         FeedToEdit = feedItem;
-        NewFeed = await _rssDataAccess.GetAsync(feedItem.Title);
+        NewFeed = await _rssDataAccess.GetByTitleAsync(feedItem.Title);
         _editContext = new EditContext(NewFeed);
     }
 

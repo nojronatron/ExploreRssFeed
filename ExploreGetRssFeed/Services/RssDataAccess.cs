@@ -122,8 +122,8 @@ namespace ExploreGetRssFeed.Services
         /// Retrieves a specific item from the database using its Title.
         /// </summary>
         /// <param name="title">Title</param>
-        /// <returns>A found instance representation, or empty if not found</returns>
-        public async Task<FeedEntryModel> GetAsync(string title)
+        /// <returns>The FeedEntryModel instance retrieved from the database, or empty if not found</returns>
+        public async Task<FeedEntryModel> GetByTitleAsync(string title)
         {
             using var context = dbFactory.CreateDbContext();
 
@@ -147,6 +147,38 @@ namespace ExploreGetRssFeed.Services
             }
             
             logger.LogWarning("No item found with title {title}", title);
+            return new FeedEntryModel();
+        }
+
+        /// <summary>
+        /// Retrieves a specific item from the database using its RouteName.
+        /// </summary>
+        /// <param name="routeName"></param>
+        /// <returns>The FeedEntryModel instance retrieved from the database, or empty if not found</returns>
+        public async Task<FeedEntryModel> GetByRouteAsync(string routeName)
+        {
+            using var context = dbFactory.CreateDbContext();
+
+            var foundItem = await context.FeedEntryDataModels
+                .FirstOrDefaultAsync(feedEntry =>
+                feedEntry.RouteName == routeName);
+
+            if (foundItem is not null)
+            {
+                logger.LogInformation("Item found with route name {routename}", routeName);
+
+                // null coalescing operator ?? returns value of left-hand operand if not null
+                // otherwise returns the right-hand operand
+                var result = FeedEntryModel.Create(
+                    foundItem.Title,
+                    foundItem.RouteName ?? string.Empty,
+                    foundItem.WebAddress ?? string.Empty
+                    );
+
+                return result;
+            }
+
+            logger.LogWarning("No item found with route name {routename}", routeName);
             return new FeedEntryModel();
         }
     }
