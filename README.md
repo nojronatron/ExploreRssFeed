@@ -8,7 +8,8 @@ This is a simple experimental Web App to get the RSS feed from a website and dis
 
 ## Status
 
-[![Build](https://github.com/nojronatron/ExploreRssFeed/actions/workflows/build.yml/badge.svg)](https://github.com/nojronatron/ExploreRssFeed/actions/workflows/build.yml)
+[![Debug Build and Test](https://github.com/nojronatron/ExploreRssFeed/actions/workflows/test.yml/badge.svg)](https://github.com/nojronatron/ExploreRssFeed/actions/workflows/test.yml)
+[![Release Build](https://github.com/nojronatron/ExploreRssFeed/actions/workflows/build.yml/badge.svg)](https://github.com/nojronatron/ExploreRssFeed/actions/workflows/build.yml)
 
 ## Features
 
