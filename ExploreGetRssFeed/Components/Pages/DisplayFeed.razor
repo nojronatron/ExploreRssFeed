@@ -1,15 +1,16 @@
-﻿@page "/displayfeed/{rssfeedurl}"
+﻿@page "/displayfeed/{routeName}"
 
 @using ExploreGetRssFeed.Models
 @using System.Xml.Linq
+@using ExploreGetRssFeed.Services
 @using Microsoft.AspNetCore.Components
 @using ExploreGetRssFeed.Components.Fragments
 @using Microsoft.Extensions.Caching.Memory
 
-@inject IConfiguration Configuration
 @inject IMemoryCache MemoryCache
 @inject IHttpClientFactory ClientFactory
 @inject ILogger<DisplayFeed> _logger
+@inject IRssDataAccess _rssDataAccess
 
 @attribute [StreamRendering]
 
@@ -39,13 +40,12 @@
 
 @code {
     [Parameter]
-    public string RssFeedUrl { get; set; } = string.Empty;
+    public string RouteName { get; set; } = string.Empty;
+
+    private const string NAMED_HTTP_CLIENT = "RssClient";
     private string FeedContent { get; set; } = string.Empty;
     private bool ApiError { get; set; }
     private IEnumerable<FeedModel>? FeedItems { get; set; }
-
-    private string SomeHtml = "<p>This is <em>HTML</em></p>";
-    public MarkupString GetSomeHtml => new MarkupString(SomeHtml);
 
     private DateTime LastFetchTime { get; set; } = DateTime.MinValue;
     private TimeSpan CacheDuration => TimeSpan.FromHours(1);
@@ -69,18 +69,13 @@
         }
 
         var request = new HttpRequestMessage(HttpMethod.Get, targetUrl);
-        request.Headers.Add("Accept", "application/xml");
-        request.Headers.Add("User-Agent", "jonrumsey.devATgemailDOTcom");
-
-        var client = ClientFactory.CreateClient();
+        var client = ClientFactory.CreateClient(NAMED_HTTP_CLIENT);
         var response = await client.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
         {
             FeedContent = await response.Content.ReadAsStringAsync();
-            // _logger.LogInformation("Feed Content: {feedcontent}", FeedContent);
             ProcessXml();
-            // set feeditems and current datetime to memorycache
             MemoryCache.Set(targetUrl, (FeedItems, DateTime.Now), CacheDuration);
         }
         else
@@ -117,20 +112,27 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        string? feedUrl;
+        FeedEntryModel entry = await _rssDataAccess.GetByRouteAsync(RouteName);
 
-        if (string.IsNullOrWhiteSpace(RssFeedUrl) == false)
+        if (entry is not null && entry.WebAddress is not null)
         {
-            feedUrl = Configuration.GetValue<string>(RssFeedUrl);
-            _logger.LogInformation("FeedUrl resolved to {furl}.", feedUrl);
+            string feedUrl = entry.WebAddress ?? string.Empty;
+            _logger.LogInformation("Rss Feed Web Address resolved to {furl}", feedUrl);
 
             if (string.IsNullOrWhiteSpace(feedUrl) == false)
             {
                 await GetFeed(feedUrl);
             }
+            else
+            {
+                _logger.LogError("Rss Feed Web Address was empty!");
+            }
+        }
+        else
+        {
+            _logger.LogError("Rss Feed item was null!");
         }
 
         base.OnParametersSet();
     }
-
 }
