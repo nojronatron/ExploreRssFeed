@@ -1,10 +1,10 @@
 **/bin
 **/obj
 **/*.user
-*.nupkg
-packages/
-.nuget/
-publish/
+**/*.nupkg
+**/packages/
+**/.nuget/
+**/publish/
 out/
 **/.vs
 
@@ -13,5 +13,5 @@ out/
 *.db-shm
 *.db-wal
 
-appsettings.test.json
-appsettings.Development.json
+**/appsettings.test.json
+**/appsettings.Development.json
