@@ -13,5 +13,5 @@ out/
 *.db-shm
 *.db-wal
 
-**/appsettings.test.json
-**/appsettings.Development.json
+// appsettings file
+appsettings.Development.json
