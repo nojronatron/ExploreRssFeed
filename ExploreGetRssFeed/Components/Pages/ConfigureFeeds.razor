@@ -85,8 +85,13 @@ else
 
         if (feedItem is null || string.IsNullOrWhiteSpace(feedItem.Title))
         {
-            // todo: Notify the user that the update could not be completed
-            // and supply information on how to continue or correct the issue
+            string routeName = string.IsNullOrWhiteSpace(feedItem.RouteName)
+                ? string.Empty
+                : feedItem.RouteName;
+            string pathUrl = string.IsNullOrWhiteSpace(feedItem.PathUrl)
+                ? string.Empty
+                : feedItem.PathUrl;
+            _logger.LogWarning("Somehow feed item with route name {routename} and path URL {pathurl} had no title.", routeName, pathUrl);
             return;
         }
         FeedToEdit = feedItem;
