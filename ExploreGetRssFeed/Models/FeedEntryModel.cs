@@ -14,7 +14,7 @@ namespace ExploreGetRssFeed.Models
 
         public string? RouteName { get; set; }
 
-        public string BaseUrl = "/rssfeeds/";
+        public string BaseUrl = "/displayfeed/";
 
         // Ensures a path is returned even if RouteName is null
         public string PathUrl
@@ -29,7 +29,7 @@ namespace ExploreGetRssFeed.Models
 
         public string ToRow()
         {
-            return $"{Title}: {WebAddress}";
+            return $"{Title}: {PathUrl}";
         }
 
         public static FeedEntryModel Create(string title, string routeName, string webAddress)
