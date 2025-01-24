@@ -1,22 +1,17 @@
-﻿<div class="row">
-    <div class="col">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">@Title</h5>
-                <p class="card-text">@Description</p>
-                <a href="@Link" class="btn btn-primary">Read More</a>
-            </div>
-        </div>
+﻿@using ExploreGetRssFeed.Models
+@using System.ComponentModel.DataAnnotations
+
+<div class="card border-secondary container-sm mb-2">
+    <div class="card-header">
+        <h5 class="card-title">Title: <a href="@FeedItem.Link" class="link-primary">@FeedItem.Title</a></h5>
+        <p class="card-subtitle">Published: @FeedItem.PubDateFormatted()</p>
     </div>
+    <p class="card-body">
+        @FeedItem.Description
+    </p>
 </div>
 
 @code {
-    // [Parameter]
-    // public string Id { get; set; }
     [Parameter]
-    public string Title { get; set; }
-    [Parameter]
-    public MarkupString Description { get; set; }
-    [Parameter]
-    public string Link { get; set; }
+    public required FeedModel FeedItem { get; set; }
 }
