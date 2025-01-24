@@ -30,7 +30,7 @@ namespace ExploreGetRssFeed.Models
             string cleanTitle = title.Trim();
             string cleanLink = CleanLink(link);
             DateTime cleanPubDate = string.IsNullOrWhiteSpace(pubDate) ? DateTime.Now : DateTime.Parse(pubDate);
-            string cleanDescription = CleanDescription(description);
+            string cleanDescription = CleanDescription(description, cleanTitle);
 
             return new FeedModel()
             {
@@ -45,7 +45,7 @@ namespace ExploreGetRssFeed.Models
         {
             string cleanTitle = title.Trim();
             string cleanLink = CleanLink(link);
-            string cleanDescription = CleanDescription(description);
+            string cleanDescription = CleanDescription(description, cleanTitle);
 
             return new FeedModel()
             {
@@ -55,11 +55,14 @@ namespace ExploreGetRssFeed.Models
             };
         }
 
-        // Get the first paragraph content only.
-        public static string CleanDescription(string description)
+        /// <summary>
+        /// Get the content between the first pair of paragraph html elements.
+        /// </summary>
+        /// <param name="description"></param>
+        /// <param name="alternateDescription"></param>
+        /// <returns>Plain text content or if no description, the alternate description provided</returns>
+        public static string CleanDescription(string description, string alternateDescription)
         {
-            string defaultDescription = "<p>No description</p>";
-
             // 3 cases:
             // 1. description is empty. Return the default description.
             // 2. description has content but no paragraph tags: Return the trimmed description.
@@ -68,7 +71,7 @@ namespace ExploreGetRssFeed.Models
 
             if (string.IsNullOrWhiteSpace(description))
             {
-                return defaultDescription;
+                return alternateDescription;
             }
 
             string pattern = @"<p>(.*?)</p>";
