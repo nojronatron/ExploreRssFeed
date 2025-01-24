@@ -4,6 +4,9 @@ namespace ExploreGetRssFeed.Models
 {
     public class FeedEntryModel
     {
+        // tied to DisplayFeed page
+        public static string DefaultDisplayFeedBaseUrl => "/displayfeed/";
+
         [Required(ErrorMessage = "Make up a short title for this RSS Feed.")]
         [StringLength(maximumLength: 30, MinimumLength = 3)]
         public string? Title { get; set; }
