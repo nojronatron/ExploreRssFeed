@@ -134,8 +134,15 @@ else
             return;
         }
 
-        int createReturnVal = await _rssDataAccess.CreateAsync(NewFeed.Title!, NewFeed.WebAddress!, NewFeed.PathUrl!);
+        _logger.LogInformation("HandleFormSubmission: NewFeed title {title}, web address {webaddress}, and path url {defaultfeeditemsbaseurl}", 
+            NewFeed.Title, 
+            NewFeed.WebAddress, 
+            FeedEntryModel.DefaultDisplayFeedBaseUrl);
+
+        int createReturnVal = await _rssDataAccess.CreateAsync(NewFeed.Title!, NewFeed.WebAddress!, FeedEntryModel.GetRouteName(NewFeed.Title!));
+        
         _logger.LogInformation("Form submitted, validation passed, data stored (value: {createReturnVal}).", createReturnVal);
+
         RssFeeds.Add(NewFeed);
         NewFeed = new();
         _editContext = new EditContext(NewFeed);
