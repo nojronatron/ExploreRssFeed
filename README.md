@@ -20,13 +20,14 @@ This is a simple experimental Web App to get the RSS feed from a website and dis
 - Enable processing some native HTML content from the feed.
 - Caches RSS feed data for an hour.
 - Bundle-ready using LigerShark's WebOptimizer package.
-- Dynamically adding RSS Feed URLs, using EntityFrameworkCore SQLite.
+- Dynamically add RSS Feed URLs in Blazor page, backed by EntityFrameworkCore SQLite.
+- Display publish date of each RSS feed item.
 
 ## Requirements
 
-- RSS Feed URLs must be known, valid, and configured in `appsettings.json`
-- DotNET 8.0
-- An internet connection
+- DotNET 8.0 Runtime.
+- An internet connection.
+- You must know the RSS Feed website url (there is no auto discovery) to add it in the Configure web page.
 
 ## Future
 
@@ -36,9 +37,8 @@ As time permits new features may be added. Some top-of-mind ideas:
 - Implement themes.
 - Ensure accessibility.
 - Ensure responsive design for many form factors, devices.
-- Display publish date of each RSS feed item.
 - Better processing of feed data to ensure HTML and other content is displayed correctly but executable code is processed.
-- Explore effecient use of Components and Render Fragments.
+- Explore efficient use of Components and Render Fragments.
 - Paginate results.
 - Use SQL Server or PostgreSQL to better support deployment to cloud.
 

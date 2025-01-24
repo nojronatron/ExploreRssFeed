@@ -42,26 +42,28 @@ namespace ExploreGetRssFeed.Tests.Models
         }
 
         [Fact]
-        public void CleanDescription_WithEmptyDescription_ShouldReturnDefaultDescription()
+        public void CleanDescription_WithEmptyDescription_ShouldReturnAltDescription()
         {
             // Arrange
-            string description = string.Empty;
+            string expectedDescription = string.Empty;
+            string expectedAltDescription = "Alternate Description";
 
             // Act
-            string result = FeedModel.CleanDescription(description);
+            string result = FeedModel.CleanDescription(expectedDescription, expectedAltDescription);
 
             // Assert
-            Assert.Equal("<p>No description</p>", result);
+            Assert.Equal(expectedAltDescription, result);
         }
 
         [Fact]
         public void CleanDescription_WithParagraphTags_ShouldReturnFirstParagraphContent()
         {
             // Arrange
-            string description = "<p>First Paragraph</p><p>Second Paragraph</p>";
+            string expectedDescription = "<p>First Paragraph</p><p>Second Paragraph</p>";
+            string expectedAltDescription = "Alternate Description";
 
             // Act
-            string result = FeedModel.CleanDescription(description);
+            string result = FeedModel.CleanDescription(expectedDescription, expectedAltDescription);
 
             // Assert
             Assert.Equal("First Paragraph", result);
@@ -71,26 +73,29 @@ namespace ExploreGetRssFeed.Tests.Models
         public void CleanDescription_WithoutParagraphTags_ShouldReturnTrimmedDescription()
         {
             // Arrange
-            string description = "No paragraph tags";
+            string spaceyDescription = "  No paragraph tags   ";
+            string expectedDescription = "No paragraph tags";
+            string expectedAltDescription = "Alternate Description";
 
             // Act
-            string result = FeedModel.CleanDescription(description);
+            string result = FeedModel.CleanDescription(spaceyDescription, expectedAltDescription);
 
             // Assert
-            Assert.Equal("No paragraph tags", result);
+            Assert.Equal(expectedDescription, result);
         }
 
         [Fact]
         public void CleanLink_WithValidLink_ShouldReturnCleanedLink()
         {
             // Arrange
-            string link = @"<Link>https://example.com/rss</Link>";
+            string inputLink = @"<Link>https://example.com/rss</Link>";
+            string expectedLink = @"https://example.com/rss";
 
             // Act
-            string result = FeedModel.CleanLink(link);
+            string result = FeedModel.CleanLink(inputLink);
 
             // Assert
-            Assert.Equal(@"https://example.com/rss", result);
+            Assert.Equal(expectedLink, result);
         }
 
         [Fact]
