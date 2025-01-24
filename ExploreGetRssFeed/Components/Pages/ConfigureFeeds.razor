@@ -101,7 +101,11 @@ else
 
     private async Task HandleDeleteFeedItem(FeedEntryModel feedEntry)
     {
-        _logger.LogInformation("Entered HandleDeleteFeedItem method.");
+        if (feedEntry is null || string.IsNullOrWhiteSpace(feedEntry.Title))
+        {
+            _logger.LogWarning("Unable to delete a null item, returning no-op.");
+            return;
+        }
 
         int deleteCount = await _rssDataAccess.RemoveAsync(
             feedEntry.Title!
