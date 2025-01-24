@@ -30,19 +30,9 @@ namespace ExploreGetRssFeed.Models
             }
         }
 
-        public string ToRow()
+        public static string GetRouteName(string title)
         {
-            return $"{Title}: {PathUrl}";
-        }
-
-        public static FeedEntryModel Create(string title, string routeName, string webAddress)
-        {
-            return new FeedEntryModel
-            {
-                Title = title,
-                RouteName = routeName,
-                WebAddress = webAddress
-            };
+            return string.Concat(DefaultDisplayFeedBaseUrl, title.Trim());
         }
     }
 }
