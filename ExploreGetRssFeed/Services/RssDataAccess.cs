@@ -52,7 +52,6 @@ namespace ExploreGetRssFeed.Services
             return dtoList.Select(
                 dto => FeedEntryModel.Create(
                     dto.Title,
-                    dto.RouteName,
                     dto.WebAddress
                     ));
         }
@@ -71,17 +70,13 @@ namespace ExploreGetRssFeed.Services
                 .FirstOrDefaultAsync(feedEntry =>
                     feedEntry.Title == existingItem.Title);
 
-            if (dtoToUpdate is null)
+            if (dtoToUpdate is null || string.IsNullOrWhiteSpace(dtoToUpdate.Title))
             {
-                logger.LogWarning("No item with Title {title} was found, no update performed.", existingItem.Title);
+                _logger.LogWarning("No item with Title {title} was found, no update performed.", existingItem.Title);
                 return 0;
             }
 
-            if (string.IsNullOrWhiteSpace(updatedItem.RouteName) == false
-                && dtoToUpdate.RouteName.Equals(updatedItem.RouteName) == false)
-            {
-                dtoToUpdate.RouteName = updatedItem.RouteName;
-            }
+            dtoToUpdate.RouteName = FeedEntryModel.GetRouteName(updatedItem.Title!);
 
             if (string.IsNullOrWhiteSpace(updatedItem.WebAddress) == false
                 && dtoToUpdate.WebAddress.Equals(updatedItem.WebAddress) == false)
@@ -142,7 +137,6 @@ namespace ExploreGetRssFeed.Services
                 // otherwise returns the right-hand operand
                 var result = FeedEntryModel.Create(
                     foundItem.Title,
-                    foundItem.RouteName ?? string.Empty,
                     foundItem.WebAddress ?? string.Empty
                     );
 
@@ -174,7 +168,6 @@ namespace ExploreGetRssFeed.Services
                 // otherwise returns the right-hand operand
                 var result = FeedEntryModel.Create(
                     foundItem.Title,
-                    foundItem.RouteName ?? string.Empty,
                     foundItem.WebAddress ?? string.Empty
                     );
 
