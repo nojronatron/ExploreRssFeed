@@ -6,13 +6,13 @@ namespace ExploreGetRssFeed.Services
 {
     public class RssDataAccess : IRssDataAccess
     {
-        private readonly IDbContextFactory<ExploreGetRssFeedContext> dbFactory;
-        private readonly ILogger<RssDataAccess> logger;
+        private readonly IDbContextFactory<ExploreGetRssFeedContext> _dbFactory;
+        private readonly ILogger<RssDataAccess> _logger;
 
         public RssDataAccess(IDbContextFactory<ExploreGetRssFeedContext> dbFactory, ILogger<RssDataAccess> logger)
         {
-            this.dbFactory = dbFactory;
-            this.logger = logger;
+            _dbFactory = dbFactory;
+            _logger = logger;
         }
 
         /// <summary>
@@ -24,7 +24,9 @@ namespace ExploreGetRssFeed.Services
         /// <returns>The number of entries written to the db</returns>
         public async Task<int> CreateAsync(string title, string webAddress, string pathUrl)
         {
-            using var context = dbFactory.CreateDbContext();
+            _logger.LogInformation("CreateAsync received title {title}, webAddress {webAddress}, pathUrl {pathurl}", title, webAddress, pathUrl);
+
+            using var context = _dbFactory.CreateDbContext();
 
             var dto = new FeedEntryDataModel
             {
@@ -33,6 +35,7 @@ namespace ExploreGetRssFeed.Services
                 WebAddress = webAddress
             };
 
+            _logger.LogInformation("New DTO to store is title {title}, webAddress {webAddress}, pathUrl {pathurl}", title, webAddress, pathUrl);
             context.FeedEntryDataModels.Add(dto);
             return await context.SaveChangesAsync();
         }
@@ -43,7 +46,7 @@ namespace ExploreGetRssFeed.Services
         /// <returns>A list of FeedModel</returns>
         public async Task<IEnumerable<FeedEntryModel>> GetAllAsync()
         {
-            using var context = dbFactory.CreateDbContext();
+            using var context = _dbFactory.CreateDbContext();
             var dtoList = await context.FeedEntryDataModels.AsNoTracking().ToListAsync();
 
             return dtoList.Select(
@@ -63,7 +66,7 @@ namespace ExploreGetRssFeed.Services
         /// <returns></returns>
         public async Task<int> UpdateAsync(FeedEntryModel existingItem, FeedEntryModel updatedItem)
         {
-            using var context = dbFactory.CreateDbContext();
+            using var context = _dbFactory.CreateDbContext();
             var dtoToUpdate = await context.FeedEntryDataModels
                 .FirstOrDefaultAsync(feedEntry =>
                     feedEntry.Title == existingItem.Title);
@@ -102,7 +105,7 @@ namespace ExploreGetRssFeed.Services
         /// <returns>The number of items removed from the database</returns>
         public async Task<int> RemoveAsync(string title)
         {
-            using var context = dbFactory.CreateDbContext();
+            using var context = _dbFactory.CreateDbContext();
 
             var itemToRemove = await context.FeedEntryDataModels
                 .FirstOrDefaultAsync(feedEntry =>
@@ -110,7 +113,7 @@ namespace ExploreGetRssFeed.Services
 
             if (itemToRemove is null)
             {
-                logger.LogWarning("No item found to remove.");
+                _logger.LogWarning("No item found to remove.");
                 return 0;
             };
 
@@ -125,7 +128,7 @@ namespace ExploreGetRssFeed.Services
         /// <returns>The FeedEntryModel instance retrieved from the database, or empty if not found</returns>
         public async Task<FeedEntryModel> GetByTitleAsync(string title)
         {
-            using var context = dbFactory.CreateDbContext();
+            using var context = _dbFactory.CreateDbContext();
 
             var foundItem = await context.FeedEntryDataModels
                 .FirstOrDefaultAsync(feedEntry =>
@@ -133,7 +136,7 @@ namespace ExploreGetRssFeed.Services
 
             if (foundItem is not null)
             {
-                logger.LogInformation("Item found with title {title}", title);
+                _logger.LogInformation("Item found with title {title}", title);
 
                 // null coalescing operator ?? returns value of left-hand operand if not null
                 // otherwise returns the right-hand operand
@@ -146,7 +149,7 @@ namespace ExploreGetRssFeed.Services
                 return result;
             }
             
-            logger.LogWarning("No item found with title {title}", title);
+            _logger.LogWarning("No item found with title {title}", title);
             return new FeedEntryModel();
         }
 
@@ -157,7 +160,7 @@ namespace ExploreGetRssFeed.Services
         /// <returns>The FeedEntryModel instance retrieved from the database, or empty if not found</returns>
         public async Task<FeedEntryModel> GetByRouteAsync(string routeName)
         {
-            using var context = dbFactory.CreateDbContext();
+            using var context = _dbFactory.CreateDbContext();
 
             var foundItem = await context.FeedEntryDataModels
                 .FirstOrDefaultAsync(feedEntry =>
@@ -165,7 +168,7 @@ namespace ExploreGetRssFeed.Services
 
             if (foundItem is not null)
             {
-                logger.LogInformation("Item found with route name {routename}", routeName);
+                _logger.LogInformation("Item found with route name {routename}", routeName);
 
                 // null coalescing operator ?? returns value of left-hand operand if not null
                 // otherwise returns the right-hand operand
@@ -178,7 +181,7 @@ namespace ExploreGetRssFeed.Services
                 return result;
             }
 
-            logger.LogWarning("No item found with route name {routename}", routeName);
+            _logger.LogWarning("No item found with route name {routename}", routeName);
             return new FeedEntryModel();
         }
     }
