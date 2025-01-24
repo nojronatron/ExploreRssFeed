@@ -79,20 +79,19 @@ else
 
     string ButtonText { get; set; } = "Add This Feed";
 
+    /// <summary>
+    /// Updates an existing Feed Item in the database and the Blazor Component state.
+    /// </summary>
+    /// <param name="feedItem"></param>
+    /// <returns>void</returns>
+    /// <exception cref="ArgumentException"></exception>
     private async Task HandleEditFeedItem(FeedEntryModel feedItem)
     {
         _logger.LogInformation("Entered HandleEditFeedItem method");
 
         if (string.IsNullOrWhiteSpace(feedItem.Title))
         {
-            string routeName = string.IsNullOrWhiteSpace(feedItem.RouteName)
-                ? string.Empty
-                : feedItem.RouteName;
-            string pathUrl = string.IsNullOrWhiteSpace(feedItem.PathUrl)
-                ? string.Empty
-                : feedItem.PathUrl;
-            _logger.LogWarning("Somehow feed item with route name {routename} and path URL {pathurl} had no title.", routeName, pathUrl);
-            return;
+            throw new ArgumentException("FeedEntryModel instance is missing Title property value.");
         }
 
         FeedToEdit = feedItem;
