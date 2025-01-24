@@ -1,4 +1,4 @@
-﻿@page "/displayfeed/{routeName}"
+﻿@page "/displayfeed/{feedTitle}"
 
 @using ExploreGetRssFeed.Models
 @using System.Xml.Linq
@@ -40,7 +40,7 @@
 
 @code {
     [Parameter]
-    public string RouteName { get; set; } = string.Empty;
+    public string FeedTitle { get; set; } = string.Empty;
 
     private const string NAMED_HTTP_CLIENT = "RssClient";
     private string FeedContent { get; set; } = string.Empty;
@@ -112,7 +112,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        FeedEntryModel entry = await _rssDataAccess.GetByRouteAsync(RouteName);
+        FeedEntryModel entry = await _rssDataAccess.GetByTitleAsync(FeedTitle);
 
         if (entry is not null && entry.WebAddress is not null)
         {
