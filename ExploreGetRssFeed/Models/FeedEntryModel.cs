@@ -15,19 +15,13 @@ namespace ExploreGetRssFeed.Models
         [Url(ErrorMessage = "The url does not match an expected format.")]
         public string? WebAddress { get; set; }
 
-        public string? RouteName { get; set; }
-
-        public string BaseUrl = "/displayfeed/";
-
-        // Ensures a path is returned even if RouteName is null
-        public string PathUrl
+        public static FeedEntryModel Create(string title, string webAddress)
         {
-            get
+            return new FeedEntryModel
             {
-                return RouteName is null
-                    ? string.Concat(BaseUrl, Title!.Replace(" ", ""))
-                    : string.Concat(BaseUrl, RouteName);
-            }
+                Title = title,
+                WebAddress = webAddress,
+            };
         }
 
         public static string GetRouteName(string title)
