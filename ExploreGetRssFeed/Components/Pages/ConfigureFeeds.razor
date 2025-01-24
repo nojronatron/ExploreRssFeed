@@ -112,7 +112,7 @@ else
         );
 
         _logger.LogInformation("Feed deleted: {title}, {webaddr}, {pathurl}.",
-            feedEntry.Title, feedEntry.WebAddress, feedEntry.PathUrl);
+            feedEntry.Title, feedEntry.WebAddress, FeedEntryModel.GetRouteName(feedEntry.Title));
         RssFeeds.Remove(feedEntry);
     }
 
