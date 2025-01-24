@@ -40,7 +40,8 @@ else
 
     private void HandleNavManager(FeedEntryModel feedEntryItem)
     {
-        NavManager.NavigateTo(feedEntryItem.PathUrl);
+        string targetSlug = FeedEntryModel.GetRouteName(feedEntryItem.Title!);
+        NavManager.NavigateTo(targetSlug);
     }
 
     protected override async void OnParametersSet()
@@ -52,8 +53,8 @@ else
         foreach(var feed in feedModels)
         {
             _logger.LogInformation(
-                "Fetched FeedModel instance: {title}, {link}", 
-                feed.Title, feed.RouteName);
+                "Fetched FeedModel instance Title {title}, WebAddress {link}, generated Slug Url {slugurl}", 
+                feed.Title, feed.WebAddress, FeedEntryModel.GetRouteName(feed.Title!));
         }
 
         Feeds = feedModels.AsQueryable<FeedEntryModel>();

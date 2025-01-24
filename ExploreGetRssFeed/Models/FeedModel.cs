@@ -95,5 +95,14 @@ namespace ExploreGetRssFeed.Models
             var match = Regex.Match(link, pattern, RegexOptions.IgnoreCase, DefaultTimeout);
             return match.Success ? match.Groups[1].Value.Trim() : link.Trim();
         }
+
+        /// <summary>
+        /// Format the date to a more readable format.
+        /// </summary>
+        /// <returns>Example: Monday, 04 July 2024</returns>
+        public string PubDateFormatted()
+        {
+            return string.Format("{0:ddd, d MMM yyyy}", PubDate);
+        }
     }
 }
