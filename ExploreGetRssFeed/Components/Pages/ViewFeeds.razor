@@ -27,7 +27,6 @@ else
                 @for (int idx = 0; idx < Feeds.Count(); idx++)
                 {
                     var feed = Feeds.ElementAt(idx);
-                    string feedNavRoute = $"{feed.BaseUrl}{feed.RouteName}";
                     <button type="button" @onclick="@(()=>HandleNavManager(feed))">@feed.Title</button>
                 }
             </div>
@@ -40,22 +39,23 @@ else
 
     private void HandleNavManager(FeedEntryModel feedEntryItem)
     {
-        NavManager.NavigateTo(feedEntryItem.PathUrl);
+        string targetSlug = FeedEntryModel.GetRouteName(feedEntryItem.Title!);
+        NavManager.NavigateTo(targetSlug);
     }
 
     protected override async void OnParametersSet()
     {
         _logger.LogInformation("OnParametersSet: Loading feeds from DB.");
 
-        var feedModels = await _rssDataAccess.GetAllAsync();
+        var feedEntryModels = await _rssDataAccess.GetAllAsync();
 
-        foreach(var feed in feedModels)
+        foreach(var feed in feedEntryModels)
         {
             _logger.LogInformation(
-                "Fetched FeedModel instance: {title}, {link}", 
-                feed.Title, feed.RouteName);
+                "Fetched FeedModel instance Title {title}, WebAddress {link}, generated Slug Url {slugurl}", 
+                feed.Title, feed.WebAddress, FeedEntryModel.GetRouteName(feed.Title!));
         }
 
-        Feeds = feedModels.AsQueryable<FeedEntryModel>();
+        Feeds = feedEntryModels.AsQueryable<FeedEntryModel>();
     }
 }

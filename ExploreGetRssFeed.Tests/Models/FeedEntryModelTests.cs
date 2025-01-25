@@ -5,28 +5,43 @@ namespace ExploreGetRssFeed.Tests.Models
     public class FeedEntryModelTests
     {
         [Fact]
-        public void FeedEntryModel_ExpectedInstantiationState()
+        public void DefaultDisplayFeedBaseUrlIsCorrect()
         {
-            string expectedTitle = "Feed name";
-            string expectedRouteName = "BlazorRoute";
-            string expectedWebAddress = "https://somefeed.net/rss";
             string expectedBaseUrl = "/displayfeed/"; // hard-coded in the model
-            string expectedPathUrl = $"{expectedBaseUrl}{expectedRouteName}";
-            string expectedToRowString = $"{expectedTitle}: {expectedPathUrl}";
+
+            Assert.Equal(expectedBaseUrl, FeedEntryModel.DefaultDisplayFeedBaseUrl);
+        }
+
+        [Fact]
+        public void GetRouteNameCorrectlyConcatenatesUrlAndTitle()
+        {
+            string expectedTitle = "Feed Title";
+            string expectedRouteName = "/displayfeed/Feed Title";
+
+            Assert.Equal(expectedRouteName, FeedEntryModel.GetRouteName(expectedTitle));
+        }
+
+        [Fact]
+        public void CreateReturnsInstanceWithCorrectProperties()
+        {
+            string expectedTitle = "Feed Title";
+            string expectedWebAddress = "https://somefeed.net/rss";
+            string expectedRouteName = "/displayfeed/Feed Title";
 
             FeedEntryModel sut = FeedEntryModel
                 .Create(
                     expectedTitle,
-                    expectedRouteName,
                     expectedWebAddress
                 );
 
+            Assert.NotNull(sut);
+            Assert.NotNull(sut.Title);
+            Assert.NotEmpty(sut.Title);
+            Assert.NotNull(sut.WebAddress);
+            Assert.NotEmpty(sut.WebAddress);
             Assert.Equal(expectedTitle, sut.Title);
             Assert.Equal(expectedWebAddress, sut.WebAddress);
-            Assert.Equal(expectedRouteName, sut.RouteName);
-            Assert.Equal(expectedBaseUrl, sut.BaseUrl);
-            Assert.Equal(expectedPathUrl, sut.PathUrl);
-            Assert.Equal(expectedToRowString, sut.ToRow());
+            Assert.Equal(expectedRouteName, FeedEntryModel.GetRouteName(sut.Title!));
         }
     }
 }
