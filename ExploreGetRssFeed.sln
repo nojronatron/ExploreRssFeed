@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExploreGetRssFeed.Tests", "ExploreGetRssFeed.Tests\ExploreGetRssFeed.Tests.csproj", "{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExploreGetRssFeed.ServiceDefaults", "ExploreGetRssFeed.ServiceDefaults\ExploreGetRssFeed.ServiceDefaults.csproj", "{5D6F4795-F5A1-4F06-BB9D-FC1421E912E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExploreGetRssFeed.AppHost", "ExploreGetRssFeed.AppHost\ExploreGetRssFeed.AppHost.csproj", "{042DB953-D82E-4D4D-8044-CC40A14A4E79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +34,14 @@ Global
 		{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A29CF00-8AA7-4A59-B764-7DA3B652A6C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D6F4795-F5A1-4F06-BB9D-FC1421E912E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D6F4795-F5A1-4F06-BB9D-FC1421E912E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D6F4795-F5A1-4F06-BB9D-FC1421E912E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D6F4795-F5A1-4F06-BB9D-FC1421E912E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{042DB953-D82E-4D4D-8044-CC40A14A4E79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{042DB953-D82E-4D4D-8044-CC40A14A4E79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{042DB953-D82E-4D4D-8044-CC40A14A4E79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{042DB953-D82E-4D4D-8044-CC40A14A4E79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
