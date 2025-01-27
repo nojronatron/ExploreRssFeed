@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// add .net aspire service defaults
+builder.AddServiceDefaults();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -56,6 +59,9 @@ builder.Services.AddHttpClient("RssClient", config =>
 });
 
 var app = builder.Build();
+
+// set .net aspire service endpoints into the pipeline
+app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
