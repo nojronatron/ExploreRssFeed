@@ -43,6 +43,7 @@ As time permits new features may be added. Some top-of-mind ideas:
 - Explore efficient use of Components and Render Fragments.
 - Paginate results.
 - Use SQL Server or PostgreSQL to better support deployment to cloud (will also separate Data from the Blazor Server App).
+- Make the cache timeout configurable (examples: appsettings, environment variable, or simply adding a push-button to clear current cache).
 
 ## References and Kudos
 
