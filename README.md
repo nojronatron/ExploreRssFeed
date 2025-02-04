@@ -29,6 +29,8 @@ This is a simple experimental Web App to get the RSS feed from a website and dis
 - An internet connection.
 - You must know the RSS Feed website url (there is no auto discovery) to add it in the Configure web page.
 
+_Note_: This project uses [.NET Aspire 9](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) for development and testing. See also [Aspireify.net](https://aspireify.net/) and [.Net Aspire Blog Articles](https://devblogs.microsoft.com/dotnet/category/dotnet-aspire/).
+
 ## Future
 
 As time permits new features may be added. Some top-of-mind ideas:
@@ -40,9 +42,12 @@ As time permits new features may be added. Some top-of-mind ideas:
 - Better processing of feed data to ensure HTML and other content is displayed correctly but executable code is processed.
 - Explore efficient use of Components and Render Fragments.
 - Paginate results.
-- Use SQL Server or PostgreSQL to better support deployment to cloud.
+- Use SQL Server or PostgreSQL to better support deployment to cloud (will also separate Data from the Blazor Server App).
+- Make the cache timeout configurable (examples: appsettings, environment variable, or simply adding a push-button to clear current cache).
+- Open RSS Link targets in a new tab (or Window).
 
 ## References and Kudos
 
+- [Aspireify.net](https://aspireify.net/)
 - [LigerShark WebOptimizer](https://github.com/ligershark/WebOptimizer)
 - [ASP.NET Core Blazor in .NET 8.0](https://learn.microsoft.com/en-us/aspnet/core/blazor/?view=aspnetcore-8.0)
