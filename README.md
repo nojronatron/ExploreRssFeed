@@ -44,6 +44,7 @@ As time permits new features may be added. Some top-of-mind ideas:
 - Paginate results.
 - Use SQL Server or PostgreSQL to better support deployment to cloud (will also separate Data from the Blazor Server App).
 - Make the cache timeout configurable (examples: appsettings, environment variable, or simply adding a push-button to clear current cache).
+- Open RSS Link targets in a new tab (or Window).
 
 ## References and Kudos
 
