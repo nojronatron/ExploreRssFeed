@@ -57,7 +57,7 @@
                 {
                     new() { Title = "Dev Blogs .Net Feed", WebAddress = "https://devblogs.microsoft.com/dotnet/feed/", RouteName = "DevBlogsDotNetFeed" },
                     new() { Title = "NCEI NOAA Feed", WebAddress = "https://www.ncei.noaa.gov/news.xml", RouteName = "NceiNoaaGov" },
-                    new() { Title = "Aspireify Feed", WebAddress = "https://aspireify.net/rss", RouteName = "Aspireify" },
+                    new() { Title = "Aspireify Feed", WebAddress = "https://aspireify.net/rss", RouteName = "Aspireify", OpenInNewTab = true },
                     new() { Title = "Test Broken Feed", WebAddress = "https://localhost:8080/broken", RouteName = "ErrorFeed" }
                 };
         }
