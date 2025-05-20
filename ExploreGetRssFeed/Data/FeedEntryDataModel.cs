@@ -24,5 +24,7 @@ namespace ExploreGetRssFeed.Data
         [Required]
         [MaxLength(100)]
         public string RouteName { get; set; }
+
+        public bool OpenInNewTab { get; set; } = false;
     }
 }

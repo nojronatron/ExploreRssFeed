@@ -16,15 +16,17 @@ namespace ExploreGetRssFeed.Services
         }
 
         /// <summary>
-        /// Creates a new feed entry in the database.
+        /// Creates a new entry in the database.
         /// </summary>
-        /// <param name="title">The title for the new feed entry</param>
-        /// <param name="webAddress">The web address (target) to the feed</param>
-        /// <param name="pathUrl">The blazor page directive path</param>
-        /// <returns>The number of entries written to the db</returns>
-        public async Task<int> CreateAsync(string title, string webAddress, string pathUrl)
+        /// <param name="title"></param>
+        /// <param name="webAddress"></param>
+        /// <param name="pathUrl"></param>
+        /// <param name="newTab"></param>
+        /// <returns>1 if new item created and stored in the DB, otherwise 0.</returns>
+        public async Task<int> CreateAsync(string title, string webAddress, string pathUrl, bool? newTab=false)
         {
-            _logger.LogInformation("CreateAsync received title {title}, webAddress {webAddress}, pathUrl {pathurl}", title, webAddress, pathUrl);
+            var tabText = newTab == true ? "true" : "false";
+            _logger.LogInformation("CreateAsync received title {title}, webAddress {webAddress}, pathUrl {pathurl}, newTab {newTab}", title, webAddress, pathUrl, tabText);
 
             using var context = _dbFactory.CreateDbContext();
 
@@ -32,10 +34,12 @@ namespace ExploreGetRssFeed.Services
             {
                 Title = title,
                 RouteName = pathUrl,
-                WebAddress = webAddress
+                WebAddress = webAddress,
+                OpenInNewTab = newTab ?? false
             };
 
-            _logger.LogInformation("New DTO to store is title {title}, webAddress {webAddress}, pathUrl {pathurl}", title, webAddress, pathUrl);
+            tabText = dto.OpenInNewTab ? "true" : "false";
+            _logger.LogInformation("New DTO to store is title {title}, webAddress {webAddress}, pathUrl {pathurl}, newTab {newTab}", title, webAddress, pathUrl, tabText);
             context.FeedEntryDataModels.Add(dto);
             return await context.SaveChangesAsync();
         }
@@ -52,7 +56,8 @@ namespace ExploreGetRssFeed.Services
             return dtoList.Select(
                 dto => FeedEntryModel.Create(
                     dto.Title,
-                    dto.WebAddress
+                    dto.WebAddress,
+                    dto.OpenInNewTab
                     ));
         }
 
@@ -66,28 +71,100 @@ namespace ExploreGetRssFeed.Services
         public async Task<int> UpdateAsync(FeedEntryModel existingItem, FeedEntryModel updatedItem)
         {
             using var context = _dbFactory.CreateDbContext();
-            var dtoToUpdate = await context.FeedEntryDataModels
+            var entityToUpdate = await context.FeedEntryDataModels
                 .FirstOrDefaultAsync(feedEntry =>
                     feedEntry.Title == existingItem.Title);
 
-            if (dtoToUpdate is null || string.IsNullOrWhiteSpace(dtoToUpdate.Title))
+            if (entityToUpdate is null)
+            {
+                _logger.LogInformation("No item with Title {title} was found, no update performed.", existingItem.Title);
+                return 0;
+            }
+
+            if (string.IsNullOrWhiteSpace(entityToUpdate.Title)){
+                string newTab = entityToUpdate.OpenInNewTab ? "true" : "false";
+                _logger.LogError("An item with no title was returned. This database record could be corrupt: {id}, {title}, {webAddr}, {newtab}.",
+                    entityToUpdate.Id,
+                    existingItem.Title,
+                    existingItem.WebAddress,
+                    newTab);
+                return 0;
+            }
+
+            if (string.IsNullOrWhiteSpace(updatedItem.WebAddress) == false
+                && entityToUpdate.WebAddress.Equals(updatedItem.WebAddress) == false)
+            {
+                entityToUpdate.WebAddress = updatedItem.WebAddress;
+            }
+
+            if (string.IsNullOrWhiteSpace(updatedItem.Title) == false
+                && entityToUpdate.Title.Equals(updatedItem.Title) == false)
+            {
+                entityToUpdate.Title = updatedItem.Title;
+            }
+
+            entityToUpdate.OpenInNewTab = updatedItem.OpenInNewTab;
+            entityToUpdate.RouteName = FeedEntryModel.GetRouteName(updatedItem.Title!);
+            return await context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Updates a specific item in the database.
+        /// <paramref name="updateProperties"/> is a list of tuples where the first item is the property name and the second item is the new value.
+        /// </summary>
+        /// <param name="existingItem"></param>
+        /// <param name="updateProperties"></param>
+        /// <returns>Task that returns 0 if no update, 1 if update succeeded.</returns>
+        public async Task<int> UpdateAsync(FeedEntryModel existingItem, Tuple<string,string>[] updateProperties)
+        {
+            using var context = _dbFactory.CreateDbContext();
+            var entityToUpdate = await context.FeedEntryDataModels
+                .FirstOrDefaultAsync(feedEntry =>
+                    feedEntry.Title == existingItem.Title);
+
+            if (entityToUpdate is null)
             {
                 _logger.LogWarning("No item with Title {title} was found, no update performed.", existingItem.Title);
                 return 0;
             }
 
-            dtoToUpdate.RouteName = FeedEntryModel.GetRouteName(updatedItem.Title!);
-
-            if (string.IsNullOrWhiteSpace(updatedItem.WebAddress) == false
-                && dtoToUpdate.WebAddress.Equals(updatedItem.WebAddress) == false)
-            {
-                dtoToUpdate.WebAddress = updatedItem.WebAddress;
+            if (updateProperties.Length < 1) { 
+                _logger.LogInformation("No update to make (list of changes was empty).");
+                return 0;
             }
 
-            if (string.IsNullOrWhiteSpace(updatedItem.Title) == false
-                && dtoToUpdate.Title.Equals(updatedItem.Title) == false)
+            foreach (var item in updateProperties)
             {
-                dtoToUpdate.Title = updatedItem.Title;
+                var propertyName = item.Item1;
+                var propertyValue = item.Item2;
+                if (string.IsNullOrWhiteSpace(propertyValue) == false)
+                {
+                    switch (propertyName)
+                    {
+                        case nameof(entityToUpdate.Title):
+                            entityToUpdate.Title = propertyValue;
+                            break;
+                        case nameof(entityToUpdate.WebAddress):
+                            entityToUpdate.WebAddress = propertyValue;
+                            break;
+                        case nameof(entityToUpdate.RouteName):
+                            entityToUpdate.RouteName = propertyValue;
+                            break;
+                        case nameof(entityToUpdate.OpenInNewTab):
+                            if (bool.TryParse(propertyValue, out var openInNewTab))
+                            {
+                                entityToUpdate.OpenInNewTab = openInNewTab;
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Could not parse {propertyname} to a boolean value.", propertyName);
+                            }
+                            break;
+                        default:
+                            _logger.LogWarning("No match for {propertyname} found.", propertyName);
+                            break;
+                    }
+                }
             }
 
             return await context.SaveChangesAsync();
@@ -137,7 +214,8 @@ namespace ExploreGetRssFeed.Services
                 // otherwise returns the right-hand operand
                 var result = FeedEntryModel.Create(
                     foundItem.Title,
-                    foundItem.WebAddress ?? string.Empty
+                    foundItem.WebAddress ?? string.Empty,
+                    foundItem.OpenInNewTab
                     );
 
                 return result;
@@ -168,7 +246,8 @@ namespace ExploreGetRssFeed.Services
                 // otherwise returns the right-hand operand
                 var result = FeedEntryModel.Create(
                     foundItem.Title,
-                    foundItem.WebAddress ?? string.Empty
+                    foundItem.WebAddress ?? string.Empty,
+                    foundItem.OpenInNewTab
                     );
 
                 return result;

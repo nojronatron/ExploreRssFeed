@@ -7,25 +7,34 @@ namespace ExploreGetRssFeed.Models
     public class FeedModel
     {
         public int? Id { get; set; }
+        
         [Display(Name = "Title")]
         public string Title { get; set; } = "Untitled";
+        
         [Display(Name = "Link")]
         public string Link { get; set; } = string.Empty;
+        
         [Display(Name = "Creator")]
         public string Creator { get; set; } = "Unlisted";
+        
         [Display(Name = "Publish Date")]
         public DateTime PubDate { get; set; }
+        
         [Display(Name = "Description")]
         public string Description { get; set; } = "<p>No description</p>";
+        
         [Display(Name = "Content")]
         public string Content { get; set; } = "None";
+        
+        [Display(Name = "NewTab")]
+        public bool NewTab { get; set; } = false;
 
         public MarkupString DescriptionAsHtml => new MarkupString(Description);
         public MarkupString LinkAsHtml => new MarkupString($"<a href=\"{Link}\">{Link}</a>");
 
         private static TimeSpan DefaultTimeout => TimeSpan.FromSeconds(2);
 
-        public static FeedModel Create(string title, string link, string pubDate, string description)
+        public static FeedModel Create(string title, string link, string pubDate, string description, bool newTab=false)
         {
             string cleanTitle = title.Trim();
             string cleanLink = CleanLink(link);
@@ -38,20 +47,7 @@ namespace ExploreGetRssFeed.Models
                 Link = cleanLink,
                 PubDate = cleanPubDate,
                 Description = cleanDescription,
-            };
-        }
-
-        public static FeedModel Create(string title, string link, string description)
-        {
-            string cleanTitle = title.Trim();
-            string cleanLink = CleanLink(link);
-            string cleanDescription = CleanDescription(description, cleanTitle);
-
-            return new FeedModel()
-            {
-                Title = cleanTitle,
-                Link = cleanLink,
-                Description = cleanDescription,
+                NewTab = newTab,
             };
         }
 

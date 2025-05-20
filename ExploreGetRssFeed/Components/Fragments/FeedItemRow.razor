@@ -3,7 +3,7 @@
 
 <div class="card border-secondary container-sm mb-2">
     <div class="card-header">
-        <h5 class="card-title">Title: <a href="@FeedItem.Link" class="link-primary">@FeedItem.Title</a></h5>
+        <h5 class="card-title">Title: <a href="@FeedItem.Link" class="link-primary" target="@AnchorTargetProp">@FeedItem.Title</a></h5>
         <p class="card-subtitle">Published: @FeedItem.PubDateFormatted()</p>
     </div>
     <p class="card-body">
@@ -14,4 +14,12 @@
 @code {
     [Parameter]
     public required FeedModel FeedItem { get; set; }
+
+    private string AnchorTargetProp = "_self";
+
+    protected override void OnParametersSet()
+    {
+        AnchorTargetProp = FeedItem.NewTab ? "_blank" : "_self";
+        base.OnParametersSet();
+    }
 }

@@ -15,12 +15,15 @@ namespace ExploreGetRssFeed.Models
         [Url(ErrorMessage = "The url does not match an expected format.")]
         public string? WebAddress { get; set; }
 
-        public static FeedEntryModel Create(string title, string webAddress)
+        public bool OpenInNewTab { get; set; }
+
+        public static FeedEntryModel Create(string title, string webAddress, bool openInNewTab)
         {
             return new FeedEntryModel
             {
                 Title = title,
                 WebAddress = webAddress,
+                OpenInNewTab = openInNewTab
             };
         }
 

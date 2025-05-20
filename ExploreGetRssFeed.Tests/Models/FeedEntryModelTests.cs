@@ -21,17 +21,16 @@ namespace ExploreGetRssFeed.Tests.Models
             Assert.Equal(expectedRouteName, FeedEntryModel.GetRouteName(expectedTitle));
         }
 
-        [Fact]
-        public void CreateReturnsInstanceWithCorrectProperties()
+        [Theory]
+        [InlineData("Feed Title", "https://somefeed.net/rss", "/displayfeed/Feed Title", true)]
+        [InlineData("Another Feed", "https://anotherfeed.net/rss", "/displayfeed/Another Feed", false)]
+        public void CreateReturnsInstanceWithCorrectProperties(string expectedTitle, string expectedWebAddress, string expectedRouteName, bool expectedOpenInNewTab)
         {
-            string expectedTitle = "Feed Title";
-            string expectedWebAddress = "https://somefeed.net/rss";
-            string expectedRouteName = "/displayfeed/Feed Title";
-
             FeedEntryModel sut = FeedEntryModel
                 .Create(
                     expectedTitle,
-                    expectedWebAddress
+                    expectedWebAddress,
+                    expectedOpenInNewTab
                 );
 
             Assert.NotNull(sut);
@@ -42,6 +41,7 @@ namespace ExploreGetRssFeed.Tests.Models
             Assert.Equal(expectedTitle, sut.Title);
             Assert.Equal(expectedWebAddress, sut.WebAddress);
             Assert.Equal(expectedRouteName, FeedEntryModel.GetRouteName(sut.Title!));
+            Assert.Equal(expectedOpenInNewTab, sut.OpenInNewTab);
         }
     }
 }
