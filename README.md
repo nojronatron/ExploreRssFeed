@@ -22,6 +22,8 @@ This is a simple experimental Web App to get the RSS feed from a website and dis
 - Bundle-ready using LigerShark's WebOptimizer package.
 - Dynamically add RSS Feed URLs in Blazor page, backed by EntityFrameworkCore SQLite.
 - Display publish date of each RSS feed item.
+- User can click on a feed item to open the website of the feed target URL.
+- User can select whether feed sources open in same or new tab/window.
 
 ## Requirements
 
@@ -39,15 +41,18 @@ As time permits new features may be added. Some top-of-mind ideas:
 - Implement themes.
 - Ensure accessibility.
 - Ensure responsive design for many form factors, devices.
-- Better processing of feed data to ensure HTML and other content is displayed correctly but executable code is processed.
+- Better processing of feed data to ensure HTML and other content is displayed correctly but executable code is ~~processed~~ disarmed.
 - Explore efficient use of Components and Render Fragments.
 - Paginate results.
-- Use SQL Server or PostgreSQL to better support deployment to cloud (will also separate Data from the Blazor Server App).
+- Use SQL Server or PostgreSQL to better support deployment to cloud.
 - Make the cache timeout configurable (examples: appsettings, environment variable, or simply adding a push-button to clear current cache).
-- Open RSS Link targets in a new tab (or Window).
+- Upgrade to .NET 9
+- Upgrade .NET Aspire to 9.3
 
 ## References and Kudos
 
+- [.NET Aspire 9.3](https://aspireify.net/a/250519/.net-aspire-9.3-is-here-and-enhanced-with-github-copilot)
+- [.NET 9.x](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-9/overview)
 - [Aspireify.net](https://aspireify.net/)
 - [LigerShark WebOptimizer](https://github.com/ligershark/WebOptimizer)
 - [ASP.NET Core Blazor in .NET 8.0](https://learn.microsoft.com/en-us/aspnet/core/blazor/?view=aspnetcore-8.0)
