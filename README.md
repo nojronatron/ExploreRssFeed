@@ -48,6 +48,7 @@ As time permits new features may be added. Some top-of-mind ideas:
 - Make the cache timeout configurable (examples: appsettings, environment variable, or simply adding a push-button to clear current cache).
 - Upgrade to .NET 9
 - Upgrade .NET Aspire to 9.3
+- Update Entity Model to calculate the route when requested, rather than store it.
 
 ## References and Kudos
 
