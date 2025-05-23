@@ -51,14 +51,15 @@ namespace ExploreGetRssFeed.Services
         public async Task<IEnumerable<FeedEntryModel>> GetAllAsync()
         {
             using var context = _dbFactory.CreateDbContext();
-            var dtoList = await context.FeedEntryDataModels.AsNoTracking().ToListAsync();
-
-            return dtoList.Select(
+            return await context.FeedEntryDataModels
+                 .AsNoTracking()
+                 .Select(
                 dto => FeedEntryModel.Create(
                     dto.Title,
                     dto.WebAddress,
                     dto.OpenInNewTab
-                    ));
+                        ))
+                .ToListAsync();
         }
 
         /// <summary>
