@@ -12,7 +12,7 @@
 
 <h3 class="text-center">Configure Feeds</h3>
 
-<h4 class="text-center mb-3">Fill out the form to @CreateOrEdit a new feed</h4>
+<h4 class="text-center mb-3">Fill out the form to @CreateOrEditDisplay a new feed</h4>
 
 <EditForm EditContext="_editContext" OnSubmit="HandleFormSubmission" class="container-md text-center">
     <div class="row justify-content-md-center my-2">
@@ -87,14 +87,13 @@ else
 
     private List<FeedEntryModel> RssFeeds { get; set; } = [];
     private FeedEntryModel? FeedToEdit { get; set; }
-    private string CreateOrEdit { get; set; } = "create";
+    private CreateOrEditMode CreateOrEdit { get; set; }
+    
+    private string CreateOrEditDisplay => CreateOrEdit == CreateOrEditMode.Create ? "Create" : "Edit";
 
     private string AddItemButtonText => "Add This Feed";
     private string UpdateItemButtonText => "Update This Feed";
     private EditContext? _editContext;
-
-    private const string CREATE = "create";
-    private const string EDIT = "edit";
 
     /// <summary>
     /// Updates an existing Feed Item in the database and the Blazor Component state.
@@ -114,7 +113,7 @@ else
         FeedToEdit = feedItem;
         NewFeed = await _rssDataAccess.GetByTitleAsync(feedItem.Title);
         _editContext = new EditContext(NewFeed);
-        CreateOrEdit = EDIT;
+        CreateOrEdit = CreateOrEditMode.Edit;
     }
 
     private async Task HandleDeleteFeedItem(FeedEntryModel feedEntry)
@@ -131,7 +130,7 @@ else
 
         _logger.LogInformation("Feed deleted: {title}, {webaddr}, {pathurl}.",
             feedEntry.Title, feedEntry.WebAddress, FeedEntryModel.GetRouteName(feedEntry.Title));
-        CreateOrEdit = CREATE;
+        CreateOrEdit = CreateOrEditMode.Create;
         await GetExistingEntries();
     }
 
@@ -170,7 +169,7 @@ else
         NewFeed = new();
         _editContext = new EditContext(NewFeed);
         FeedToEdit = null;
-        CreateOrEdit = CREATE;
+        CreateOrEdit = CreateOrEditMode.Create;
         await GetExistingEntries();
     }
 
@@ -197,5 +196,11 @@ else
     {
         await GetExistingEntries();
         _editContext = new EditContext(NewFeed);
+    }
+
+    private enum CreateOrEditMode
+    {
+        Create,
+        Edit
     }
 }
