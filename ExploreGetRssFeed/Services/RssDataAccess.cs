@@ -54,10 +54,10 @@ namespace ExploreGetRssFeed.Services
             return await context.FeedEntryDataModels
                  .AsNoTracking()
                  .Select(
-                dto => FeedEntryModel.Create(
-                    dto.Title,
-                    dto.WebAddress,
-                    dto.OpenInNewTab
+                    dto => FeedEntryModel.Create(
+                        dto.Title,
+                        dto.WebAddress,
+                        dto.OpenInNewTab
                         ))
                 .ToListAsync();
         }
@@ -82,7 +82,8 @@ namespace ExploreGetRssFeed.Services
                 return 0;
             }
 
-            if (string.IsNullOrWhiteSpace(entityToUpdate.Title)){
+            if (string.IsNullOrWhiteSpace(entityToUpdate.Title))
+            {
                 string newTab = entityToUpdate.OpenInNewTab ? "true" : "false";
                 _logger.LogError("An item with no title was returned. This database record could be corrupt: {id}, {title}, {webAddr}, {newtab}.",
                     entityToUpdate.Id,
@@ -95,6 +96,7 @@ namespace ExploreGetRssFeed.Services
             if (string.IsNullOrWhiteSpace(updatedItem.WebAddress) == false
                 && entityToUpdate.WebAddress.Equals(updatedItem.WebAddress) == false)
             {
+                _logger.LogInformation("Updating web address from {oldwebaddress} to {newwebaddress}", entityToUpdate.WebAddress, updatedItem.WebAddress);
                 entityToUpdate.WebAddress = updatedItem.WebAddress;
             }
 
@@ -104,8 +106,14 @@ namespace ExploreGetRssFeed.Services
                 entityToUpdate.Title = updatedItem.Title;
             }
 
-            entityToUpdate.OpenInNewTab = updatedItem.OpenInNewTab;
+            if (updatedItem.OpenInNewTab != entityToUpdate.OpenInNewTab)
+            {
+                _logger.LogInformation("Updating OpenInNewTab from {oldopeninnewtab} to {newopeninnewtab}", entityToUpdate.OpenInNewTab, updatedItem.OpenInNewTab);
+                entityToUpdate.OpenInNewTab = updatedItem.OpenInNewTab;
+            }
+
             entityToUpdate.RouteName = FeedEntryModel.GetRouteName(updatedItem.Title!);
+            _logger.LogInformation("Storing changes to item {title}", updatedItem.Title);
             return await context.SaveChangesAsync();
         }
 
