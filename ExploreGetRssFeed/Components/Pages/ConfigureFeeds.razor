@@ -12,7 +12,7 @@
 
 <h3 class="text-center">Configure Feeds</h3>
 
-<h4 class="text-center mb-3">Fill out the form to create a new feed</h4>
+<h4 class="text-center mb-3">Fill out the form to @CreateOrEditDisplay a new feed</h4>
 
 <EditForm EditContext="_editContext" OnSubmit="HandleFormSubmission" class="container-md text-center">
     <div class="row justify-content-md-center my-2">
@@ -25,6 +25,11 @@
         <label for="Url" class="col">Enter the feed address</label>
         <InputText class="col" id="Url" @bind-Value="NewFeed!.WebAddress" />
         <ValidationMessage For="@(()=>NewFeed!.WebAddress)" />
+    </div>
+
+    <div class="row justify-content-md-center my-2">
+        <label for="TabYN" class="col">Check To Open In New Tab</label>
+        <InputCheckbox class="col" id="TabYN" @bind-Value="NewFeed!.OpenInNewTab" />
     </div>
 
     <div class="row justify-content-md-center my-2">
@@ -50,13 +55,23 @@
 }
 else
 {
-    <h4 class="text-center">Feeds By Title, URL</h4>
+    <h4 class="text-center">Existing Feeds: Title, Opens In New Tab, Edit, or Delete</h4>
 
     <div class="container-md text-center mb-3">
         @foreach (var feedItem in RssFeeds.ToList())
         {
             <div class="row justify-content-md-center my-2">
                 <h5 class="col">@(feedItem.Title)</h5>
+
+                @if (feedItem.OpenInNewTab == true)
+                {
+                    <h5 class="col">New Tab</h5>
+                }
+                else
+                {
+                    <h5 class="col">Same Tab</h5>
+                }
+
                 <button class="btn btn-outline-secondary col" 
                 type="button" @onclick="@(() => HandleEditFeedItem(feedItem))">Edit</button>
                 <button class="btn btn-danger d-inline col" 
@@ -70,14 +85,15 @@ else
     [SupplyParameterFromForm]
     private FeedEntryModel NewFeed { get; set; } = new();
 
+    private List<FeedEntryModel> RssFeeds { get; set; } = [];
+    private FeedEntryModel? FeedToEdit { get; set; }
+    private CreateOrEditMode CreateOrEdit { get; set; }
+    
+    private string CreateOrEditDisplay => CreateOrEdit == CreateOrEditMode.Create ? "Create" : "Edit";
+
     private string AddItemButtonText => "Add This Feed";
     private string UpdateItemButtonText => "Update This Feed";
     private EditContext? _editContext;
-
-    private FeedEntryModel? FeedToEdit { get; set; }
-    private List<FeedEntryModel> RssFeeds { get; set; } = [];
-
-    string ButtonText { get; set; } = "Add This Feed";
 
     /// <summary>
     /// Updates an existing Feed Item in the database and the Blazor Component state.
@@ -97,6 +113,7 @@ else
         FeedToEdit = feedItem;
         NewFeed = await _rssDataAccess.GetByTitleAsync(feedItem.Title);
         _editContext = new EditContext(NewFeed);
+        CreateOrEdit = CreateOrEditMode.Edit;
     }
 
     private async Task HandleDeleteFeedItem(FeedEntryModel feedEntry)
@@ -113,7 +130,8 @@ else
 
         _logger.LogInformation("Feed deleted: {title}, {webaddr}, {pathurl}.",
             feedEntry.Title, feedEntry.WebAddress, FeedEntryModel.GetRouteName(feedEntry.Title));
-        RssFeeds.Remove(feedEntry);
+        CreateOrEdit = CreateOrEditMode.Create;
+        await GetExistingEntries();
     }
 
     private async Task HandleFormSubmission(EditContext context)
@@ -131,26 +149,32 @@ else
             FeedToEdit = null;
             NewFeed = new();
             _editContext = new EditContext(NewFeed);
+            await GetExistingEntries();
             return;
         }
 
-        _logger.LogInformation("HandleFormSubmission: NewFeed title {title}, web address {webaddress}, and path url {defaultfeeditemsbaseurl}", 
+        bool tabOpenBool = NewFeed.OpenInNewTab ? true : false;
+        var tabOpenText = NewFeed.OpenInNewTab ? "false" : "true";
+        
+        _logger.LogInformation("HandleFormSubmission: NewFeed title {title}, web address {webaddress}, path url {defaultfeeditemsbaseurl}, and new tab {tabOpen}", 
             NewFeed.Title, 
             NewFeed.WebAddress, 
-            FeedEntryModel.DefaultDisplayFeedBaseUrl);
+            FeedEntryModel.DefaultDisplayFeedBaseUrl,
+            tabOpenText);
 
-        int createReturnVal = await _rssDataAccess.CreateAsync(NewFeed.Title!, NewFeed.WebAddress!, FeedEntryModel.GetRouteName(NewFeed.Title!));
-        
-        _logger.LogInformation("Form submitted, validation passed, data stored (value: {createReturnVal}).", createReturnVal);
+        int createReturnVal = await _rssDataAccess.CreateAsync(NewFeed.Title!, NewFeed.WebAddress!, FeedEntryModel.GetRouteName(NewFeed.Title!), tabOpenBool);
 
-        RssFeeds.Add(NewFeed);
+        _logger.LogInformation("Form submitted, validation passed, data stored (count: {createReturnVal}).", createReturnVal);
+
         NewFeed = new();
         _editContext = new EditContext(NewFeed);
+        FeedToEdit = null;
+        CreateOrEdit = CreateOrEditMode.Create;
+        await GetExistingEntries();
     }
 
-    protected override async Task OnParametersSetAsync()
+    private async Task GetExistingEntries()
     {
-        // db data should be preferred over static configuration data
         var allEntries = await _rssDataAccess.GetAllAsync();
         int rssFeedsCount = allEntries.Count();
         _logger.LogInformation("Data access returned {Count} entries", rssFeedsCount);
@@ -165,13 +189,18 @@ else
         }
 
         var dateTimeStamp = DateTime.Now;
-        RssFeeds = allEntries.ToList();
-
-        // base is not customized so no need to call base.OnParametersSet()
+        RssFeeds = allEntries.ToList();        
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await GetExistingEntries();
         _editContext = new EditContext(NewFeed);
+    }
+
+    private enum CreateOrEditMode
+    {
+        Create,
+        Edit
     }
 }

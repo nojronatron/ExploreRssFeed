@@ -5,6 +5,23 @@ namespace ExploreGetRssFeed.Tests.Models
 {
     public class FeedEntryDataModelTests
     {
+        [Theory]
+        [InlineData("Test Title", "https://example.com", "TestRoute", true, true)]
+        [InlineData("Test Title", "https://example.com", "TestRoute", false, false)]
+        public void Create_OpenInNewTab_ShouldBeSetToTrueOrFalse(string title, string webAddress, string routeName, bool openInNewTab, bool expected)
+        {
+            // Arrange
+            var feedEntry = new FeedEntryDataModel
+            {
+                Title = title,
+                WebAddress = webAddress,
+                RouteName = routeName,
+                OpenInNewTab = openInNewTab
+            };
+            // Act & Assert
+            Assert.Equal(expected, feedEntry.OpenInNewTab);
+        }
+
         [Fact]
         public void Create_WithValidParameters_ShouldReturnFeedEntryDataModel()
         {

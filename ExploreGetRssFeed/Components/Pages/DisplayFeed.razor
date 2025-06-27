@@ -45,6 +45,7 @@
     private const string NAMED_HTTP_CLIENT = "RssClient";
     private string FeedContent { get; set; } = string.Empty;
     private bool ApiError { get; set; }
+    private bool OpenInNewTab = false;
     private IEnumerable<FeedModel>? FeedItems { get; set; }
 
     private DateTime LastFetchTime { get; set; } = DateTime.MinValue;
@@ -98,7 +99,8 @@
                 item.Element("title")?.Value ?? "Untitled",
                 item.Element("link")?.Value ?? string.Empty,
                 item.Element("pubDate")?.Value ?? DateTime.Now.ToString(),
-                item.Element("description")?.Value ?? string.Empty
+                item.Element("description")?.Value ?? string.Empty,
+                OpenInNewTab
                 ));
             ApiError = false;
         }
@@ -113,6 +115,7 @@
     protected override async Task OnParametersSetAsync()
     {
         FeedEntryModel entry = await _rssDataAccess.GetByTitleAsync(FeedTitle);
+        OpenInNewTab = entry.OpenInNewTab;
 
         if (entry is not null && entry.WebAddress is not null)
         {

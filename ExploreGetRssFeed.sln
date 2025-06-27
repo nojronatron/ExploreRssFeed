@@ -20,6 +20,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExploreGetRssFeed.ServiceDe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExploreGetRssFeed.AppHost", "ExploreGetRssFeed.AppHost\ExploreGetRssFeed.AppHost.csproj", "{042DB953-D82E-4D4D-8044-CC40A14A4E79}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".copilot", ".copilot", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		custom-instructions.md = custom-instructions.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,5 +50,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4EAF5115-E9DD-4291-B1FB-E6A4F9838240}
 	EndGlobalSection
 EndGlobal
